@@ -57,6 +57,31 @@ license = "AGPL-3.0"
 # Workspace member crates
 #
 
+# Foundation crates
+kw_action = { path = "crates/action" }
+kw_collections = { path = "crates/collections" }
+kw_command = { path = "crates/command" }
+kw_config = { path = "crates/config" }
+kw_db = { path = "crates/db" }
+kw_extension = { path = "crates/extension" }
+kw_hotkey = { path = "crates/hotkey" }
+kw_i18n = { path = "crates/i18n" }
+kw_log = { path = "crates/log" }
+kw_store = { path = "crates/store" }
+kw_workspace = { path = "crates/workspace" }
+
+# Feature crates
+kw_agent = { path = "crates/agent" }
+kw_calculator = { path = "crates/calculator" }
+kw_clipboard = { path = "crates/clipboard" }
+kw_devtools = { path = "crates/devtools" }
+kw_emoji = { path = "crates/emoji" }
+kw_file_search = { path = "crates/file-search" }
+kw_notes = { path = "crates/notes" }
+kw_onboarding = { path = "crates/onboarding" }
+kw_screenshot = { path = "crates/screenshot" }
+kw_settings = { path = "crates/settings" }
+
 
 #
 # External crates
