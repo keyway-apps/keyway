@@ -16,6 +16,35 @@ path = "src/main.rs"
 gpui = { workspace = true }
 gpui_platform = { workspace = true }
 
+[workspace]
+members = [
+    # Foundation crates
+    "crates/action",
+    "crates/bin",
+    "crates/collections",
+    "crates/command",
+    "crates/config",
+    "crates/db",
+    "crates/extension",
+    "crates/hotkey",
+    "crates/i18n",
+    "crates/log",
+    "crates/store",
+    "crates/workspace",
+
+    # Feature crates
+    "crates/agent",
+    "crates/calculator",
+    "crates/clipboard",
+    "crates/devtools",
+    "crates/emoji",
+    "crates/file-search",
+    "crates/notes",
+    "crates/onboarding",
+    "crates/screenshot",
+    "crates/settings",
+]
+
 [workspace.package]
 version = "0.1.0"
 edition = "2024"

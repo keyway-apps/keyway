@@ -2912,6 +2912,94 @@ dependencies = [
 ]
 
 [[package]]
+name = "kw_action"
+version = "0.1.0"
+
+[[package]]
+name = "kw_agent"
+version = "0.1.0"
+
+[[package]]
+name = "kw_bin"
+version = "0.1.0"
+
+[[package]]
+name = "kw_calculator"
+version = "0.1.0"
+
+[[package]]
+name = "kw_clipboard"
+version = "0.1.0"
+
+[[package]]
+name = "kw_collections"
+version = "0.1.0"
+
+[[package]]
+name = "kw_command"
+version = "0.1.0"
+
+[[package]]
+name = "kw_config"
+version = "0.1.0"
+
+[[package]]
+name = "kw_db"
+version = "0.1.0"
+
+[[package]]
+name = "kw_devtools"
+version = "0.1.0"
+
+[[package]]
+name = "kw_emoji"
+version = "0.1.0"
+
+[[package]]
+name = "kw_extension"
+version = "0.1.0"
+
+[[package]]
+name = "kw_file_search"
+version = "0.1.0"
+
+[[package]]
+name = "kw_hotkey"
+version = "0.1.0"
+
+[[package]]
+name = "kw_i18n"
+version = "0.1.0"
+
+[[package]]
+name = "kw_log"
+version = "0.1.0"
+
+[[package]]
+name = "kw_notes"
+version = "0.1.0"
+
+[[package]]
+name = "kw_onboarding"
+version = "0.1.0"
+
+[[package]]
+name = "kw_screenshot"
+version = "0.1.0"
+
+[[package]]
+name = "kw_settings"
+version = "0.1.0"
+
+[[package]]
+name = "kw_store"
+version = "0.1.0"
+
+[[package]]
+name = "kw_workspace"
+version = "0.1.0"
+
+[[package]]
 name = "lazy_static"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

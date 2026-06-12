@@ -1,5 +1,5 @@
 [package]
-name = "kw_agent"
+name = "kw_devtools"
 
 version.workspace = true
 edition.workspace = true
