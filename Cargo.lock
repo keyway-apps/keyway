@@ -3089,6 +3089,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "kw_window"
+version = "0.1.0"
+
+[[package]]
 name = "kw_workspace"
 version = "0.1.0"
 

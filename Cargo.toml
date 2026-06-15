@@ -43,6 +43,7 @@ members = [
     "crates/onboarding",
     "crates/paths",
     "crates/tracing",
+    "crates/window",
     "crates/workspace",
 
     # Feature crates
@@ -81,6 +82,7 @@ kw_hotkey = { path = "crates/hotkey" }
 kw_i18n = { path = "crates/i18n" }
 kw_paths = { path = "crates/paths" }
 kw_tracing = { path = "crates/tracing" }
+kw_window = { path = "crates/window" }
 kw_workspace = { path = "crates/workspace" }
 
 # Feature crates
