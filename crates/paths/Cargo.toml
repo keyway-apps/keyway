@@ -1,5 +1,5 @@
 [package]
-name = "kw_i18n"
+name = "kw_paths"
 
 version.workspace = true
 edition.workspace = true
@@ -7,9 +7,5 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
-
-#
-# External crates
-#
-
-rust-i18n = { workspace = true }
+dirs = { workspace = true }
+log = { workspace = true }

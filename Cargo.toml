@@ -13,6 +13,16 @@ path = "src/main.rs"
 
 [dependencies]
 
+#
+# Workspace member crates
+#
+
+kw_i18n = { workspace = true }
+
+#
+# External crates
+#
+
 gpui = { workspace = true }
 gpui_platform = { workspace = true }
 
@@ -24,12 +34,14 @@ members = [
     "crates/collections",
     "crates/command",
     "crates/config",
+    "crates/core",
     "crates/db",
     "crates/extension",
     "crates/hotkey",
     "crates/i18n",
     "crates/log",
-    "crates/store",
+    "crates/onboarding",
+    "crates/paths",
     "crates/workspace",
 
     # Feature crates
@@ -40,9 +52,9 @@ members = [
     "crates/emoji",
     "crates/file-search",
     "crates/notes",
-    "crates/onboarding",
     "crates/screenshot",
     "crates/settings",
+    "crates/store",
 ]
 
 [workspace.package]
@@ -67,7 +79,6 @@ kw_extension = { path = "crates/extension" }
 kw_hotkey = { path = "crates/hotkey" }
 kw_i18n = { path = "crates/i18n" }
 kw_log = { path = "crates/log" }
-kw_store = { path = "crates/store" }
 kw_workspace = { path = "crates/workspace" }
 
 # Feature crates
@@ -78,9 +89,9 @@ kw_devtools = { path = "crates/devtools" }
 kw_emoji = { path = "crates/emoji" }
 kw_file_search = { path = "crates/file-search" }
 kw_notes = { path = "crates/notes" }
-kw_onboarding = { path = "crates/onboarding" }
 kw_screenshot = { path = "crates/screenshot" }
 kw_settings = { path = "crates/settings" }
+kw_store = { path = "crates/store" }
 
 
 #
@@ -96,10 +107,14 @@ gpui_platform = { git = "https://github.com/zed-industries/zed" }
 image = "0.25.10"
 log = "0.4"
 nucleo = "0.5"
+once_cell = "1.21.4"
 rust-embed = "8.11"
+rust-i18n = "4.1"
+rustc-hash = "2.1.2"
 regex = "1.12"
 serde = "1"
 serde_json = "1"
 tokio = { version = "1" }
 toml = "0.9"
+tracing = "0.1"
 wasmtime = "45"
