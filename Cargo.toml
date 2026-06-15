@@ -18,6 +18,7 @@ path = "src/main.rs"
 #
 
 kw_i18n = { workspace = true }
+kw_tracing = { workspace = true }
 
 #
 # External crates
@@ -39,9 +40,9 @@ members = [
     "crates/extension",
     "crates/hotkey",
     "crates/i18n",
-    "crates/log",
     "crates/onboarding",
     "crates/paths",
+    "crates/tracing",
     "crates/workspace",
 
     # Feature crates
@@ -78,7 +79,8 @@ kw_db = { path = "crates/db" }
 kw_extension = { path = "crates/extension" }
 kw_hotkey = { path = "crates/hotkey" }
 kw_i18n = { path = "crates/i18n" }
-kw_log = { path = "crates/log" }
+kw_paths = { path = "crates/paths" }
+kw_tracing = { path = "crates/tracing" }
 kw_workspace = { path = "crates/workspace" }
 
 # Feature crates
@@ -100,12 +102,10 @@ kw_store = { path = "crates/store" }
 
 anyhow = "1"
 dirs = "6"
-env_logger = "0.11"
 futures = "0.3.32"
 gpui = { git = "https://github.com/zed-industries/zed" }
 gpui_platform = { git = "https://github.com/zed-industries/zed" }
 image = "0.25.10"
-log = "0.4"
 nucleo = "0.5"
 once_cell = "1.21.4"
 rust-embed = "8.11"
@@ -117,4 +117,7 @@ serde_json = "1"
 tokio = { version = "1" }
 toml = "0.9"
 tracing = "0.1"
+tracing-appender = "0.2"
+tracing-log = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 wasmtime = "45"

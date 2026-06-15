@@ -36,7 +36,7 @@ static CONFIG_DIR: OnceLock<PathBuf> = OnceLock::new();
 pub fn home_dir() -> &'static PathBuf {
     static HOME_DIR: OnceLock<PathBuf> = OnceLock::new();
     HOME_DIR.get_or_init(|| {
-        log::debug!("paths: initializing home directory");
+        tracing::debug!("paths: initializing home directory");
         dirs::home_dir().expect("Failed to get home dir")
     })
 }
@@ -116,6 +116,16 @@ pub fn logs_dir() -> &'static PathBuf {
             data_dir().join("logs")
         }
     })
+}
+
+pub fn log_file() -> &'static PathBuf {
+    static LOG_FILE: OnceLock<PathBuf> = OnceLock::new();
+    LOG_FILE.get_or_init(|| logs_dir().join(format!("{APP_NAME}.log")))
+}
+
+pub fn old_log_file() -> &'static PathBuf {
+    static OLD_LOG_FILE: OnceLock<PathBuf> = OnceLock::new();
+    OLD_LOG_FILE.get_or_init(|| logs_dir().join(format!("{APP_NAME}.log.old")))
 }
 
 pub fn extensions_dir() -> &'static PathBuf {
