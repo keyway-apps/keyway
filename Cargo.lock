@@ -2940,6 +2940,7 @@ dependencies = [
  "gpui_platform",
  "kw_i18n",
  "kw_tracing",
+ "kw_workspace",
 ]
 
 [[package]]
@@ -3095,6 +3096,10 @@ version = "0.1.0"
 [[package]]
 name = "kw_workspace"
 version = "0.1.0"
+dependencies = [
+ "gpui",
+ "tracing",
+]
 
 [[package]]
 name = "lazy_static"
