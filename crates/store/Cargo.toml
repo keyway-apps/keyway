@@ -1,5 +1,5 @@
 [package]
-name = "kw_store"
+name = "store"
 
 version.workspace = true
 edition.workspace = true

@@ -1,5 +1,5 @@
 [package]
-name = "kw_tracing"
+name = "ktracing"
 
 version.workspace = true
 edition.workspace = true
@@ -7,7 +7,7 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
-kw_paths = { workspace = true }
+paths = { workspace = true }
 tracing = { workspace = true }
 tracing-appender = { workspace = true }
 tracing-log = { workspace = true }

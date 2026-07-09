@@ -1,4 +1,30 @@
-use gpui::{Context, IntoElement, Render, Window, div, prelude::*, px, rgb};
+use gpui::{
+    App, AppContext, Bounds, Context, IntoElement, Render, Window, WindowBounds, WindowKind, WindowOptions, div, prelude::*, px, rgb, size,
+};
+
+pub static WIDTH: f32 = 750.0;
+pub static HEIGHT: f32 = 475.0;
+
+pub fn init(cx: &mut App) {
+    let display_id = cx
+        .displays()
+        .first()
+        .map(|d| d.id());
+
+    let mut options = WindowOptions::default();
+
+    options.focus = true;
+    
+    let size = size(px(WIDTH), px(HEIGHT));
+    options.window_bounds = Some(WindowBounds::Windowed(Bounds::centered(display_id, size, cx)));
+
+    options.titlebar = None;
+    options.is_movable = false;
+    options.kind = WindowKind::PopUp;
+
+    cx.open_window(options, |_window, cx| cx.new(|_cx| Workspace::new()))
+        .unwrap();
+}
 
 pub struct Workspace {}
 
@@ -11,29 +37,10 @@ impl Workspace {
 impl Render for Workspace {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         div()
+            .size_full()
             .flex()
             .flex_col()
-            .gap_3()
-            .bg(rgb(0x505050))
-            .size(px(500.0))
-            .justify_center()
-            .items_center()
-            .shadow_lg()
-            .border_1()
-            .border_color(rgb(0x0000ff))
-            .text_xl()
-            .text_color(rgb(0xffffff))
-            .child(format!("Hello, {}!", "world"))
-            .child(
-                div()
-                    .flex()
-                    .gap_2()
-                    .child(div().size_8().bg(gpui::red()))
-                    .child(div().size_8().bg(gpui::green()))
-                    .child(div().size_8().bg(gpui::blue()))
-                    .child(div().size_8().bg(gpui::yellow()))
-                    .child(div().size_8().bg(gpui::black()))
-                    .child(div().size_8().bg(gpui::white())),
-            )
+            .bg(rgb(0xFFFFFF))
+            .overflow_hidden()
     }
 }

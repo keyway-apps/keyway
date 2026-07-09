@@ -1,49 +1,18 @@
-[package]
-name = "keyway"
-readme = "README.md"
-
-version.workspace = true
-edition.workspace = true
-authors.workspace = true
-license.workspace = true
-
-[[bin]]
-name = "keyway"
-path = "src/main.rs"
-
-[dependencies]
-
-#
-# Workspace member crates
-#
-
-kw_i18n = { workspace = true }
-kw_tracing = { workspace = true }
-kw_workspace = { workspace = true }
-
-#
-# External crates
-#
-
-gpui = { workspace = true }
-gpui_platform = { workspace = true }
-
 [workspace]
 members = [
     # Foundation crates
-    "crates/action",
-    "crates/bin",
     "crates/collections",
     "crates/command",
     "crates/config",
     "crates/core",
     "crates/db",
     "crates/extension",
-    "crates/hotkey",
     "crates/i18n",
+    "crates/ipc",
+    "crates/net",
     "crates/onboarding",
     "crates/paths",
-    "crates/tracing",
+    "crates/ktracing",
     "crates/window",
     "crates/workspace",
 
@@ -73,54 +42,60 @@ license = "AGPL-3.0"
 #
 
 # Foundation crates
-kw_action = { path = "crates/action" }
-kw_collections = { path = "crates/collections" }
-kw_command = { path = "crates/command" }
-kw_config = { path = "crates/config" }
-kw_db = { path = "crates/db" }
-kw_extension = { path = "crates/extension" }
-kw_hotkey = { path = "crates/hotkey" }
-kw_i18n = { path = "crates/i18n" }
-kw_paths = { path = "crates/paths" }
-kw_tracing = { path = "crates/tracing" }
-kw_window = { path = "crates/window" }
-kw_workspace = { path = "crates/workspace" }
+collections = { path = "crates/collections" }
+command = { path = "crates/command" }
+config = { path = "crates/config" }
+db = { path = "crates/db" }
+extension = { path = "crates/extension" }
+i18n = { path = "crates/i18n" }
+ipc = { path = "crates/ipc" }
+net = { path = "crates/net" }
+paths = { path = "crates/paths" }
+ktracing = { path = "crates/ktracing" }
+window = { path = "crates/window" }
+workspace = { path = "crates/workspace" }
 
 # Feature crates
-kw_agent = { path = "crates/agent" }
-kw_calculator = { path = "crates/calculator" }
-kw_clipboard = { path = "crates/clipboard" }
-kw_devtools = { path = "crates/devtools" }
-kw_emoji = { path = "crates/emoji" }
-kw_file_search = { path = "crates/file-search" }
-kw_notes = { path = "crates/notes" }
-kw_screenshot = { path = "crates/screenshot" }
-kw_settings = { path = "crates/settings" }
-kw_store = { path = "crates/store" }
-
+agent = { path = "crates/agent" }
+calculator = { path = "crates/calculator" }
+clipboard = { path = "crates/clipboard" }
+devtools = { path = "crates/devtools" }
+emoji = { path = "crates/emoji" }
+file_search = { path = "crates/file-search" }
+notes = { path = "crates/notes" }
+screenshot = { path = "crates/screenshot" }
+settings = { path = "crates/settings" }
+store = { path = "crates/store" }
 
 #
 # External crates
 #
 
 anyhow = "1"
+clap = "4.6"
 dirs = "6"
 futures = "0.3.32"
 gpui = { git = "https://github.com/zed-industries/zed" }
 gpui_platform = { git = "https://github.com/zed-industries/zed" }
+gpui_tokio = { git = "https://github.com/zed-industries/zed" }
 image = "0.25.10"
+inventory = "0.3"
 nucleo = "0.5"
 once_cell = "1.21.4"
 rust-embed = "8.11"
 rust-i18n = "4.1"
-rustc-hash = "2.1.2"
+rustc-hash = "2.1.3"
 regex = "1.12"
-serde = "1"
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tokio = { version = "1" }
+tokio = { version = "1", features = ["rt", "macros", "sync"] }
+tarpc = { version = "0.37", features = ["serde-transport", "tokio1", "serde1"] }
+tokio-serde = { version = "0.9", features = ["json"] }
+tokio-util = { version = "0.7", features = ["codec"] }
 toml = "0.9"
 tracing = "0.1"
 tracing-appender = "0.2"
 tracing-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
-wasmtime = "45"
+uds_windows = "1.2"
+wasmtime = "46"

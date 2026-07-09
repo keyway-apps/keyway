@@ -1,0 +1,16 @@
+[package]
+name = "net"
+
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+tokio = { workspace = true, features = ["io-util", "net", "rt"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+uds_windows.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["io-util", "macros", "net", "rt-multi-thread", "time"] }

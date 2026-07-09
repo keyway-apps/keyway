@@ -1,5 +1,5 @@
 [package]
-name = "kw_calculator"
+name = "calculator"
 
 version.workspace = true
 edition.workspace = true

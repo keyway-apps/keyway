@@ -1,5 +1,5 @@
 [package]
-name = "kw_i18n"
+name = "i18n"
 
 version.workspace = true
 edition.workspace = true

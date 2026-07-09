@@ -1,0 +1,31 @@
+[package]
+name = "keyway"
+
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "keyway"
+path = "src/main.rs"
+
+[dependencies]
+
+#
+# Workspace member crates
+#
+
+i18n = { workspace = true }
+ktracing = { workspace = true }
+workspace = { workspace = true }
+
+#
+# External crates
+#
+
+anyhow = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+gpui = { workspace = true }
+gpui_platform = { workspace = true }
+gpui_tokio = { workspace = true }

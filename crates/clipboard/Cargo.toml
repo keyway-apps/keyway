@@ -1,7 +1,10 @@
 [package]
-name = "kw_clipboard"
+name = "clipboard"
 
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
+
+[dependencies]
+command = { workspace = true }

@@ -1,7 +1,0 @@
-[package]
-name = "kw_action"
-
-version.workspace = true
-edition.workspace = true
-authors.workspace = true
-license.workspace = true

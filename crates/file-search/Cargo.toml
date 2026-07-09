@@ -1,5 +1,5 @@
 [package]
-name = "kw_file_search"
+name = "file_search"
 
 version.workspace = true
 edition.workspace = true

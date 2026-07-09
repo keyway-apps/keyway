@@ -1,0 +1,20 @@
+[package]
+name = "ipc"
+
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+net = { workspace = true }
+paths = { workspace = true }
+
+anyhow = { workspace = true }
+gpui = { workspace = true }
+gpui_tokio = { workspace = true }
+tokio = { workspace = true }
+tarpc = { workspace = true }
+tokio-serde = { workspace = true }
+tokio-util = { workspace = true }
+tracing = { workspace = true, features = ["log"] }

@@ -1,5 +1,5 @@
 [package]
-name = "kw_window"
+name = "window"
 
 version.workspace = true
 edition.workspace = true

@@ -1,5 +1,5 @@
 [package]
-name = "kw_workspace"
+name = "workspace"
 
 version.workspace = true
 edition.workspace = true
@@ -8,4 +8,4 @@ license.workspace = true
 
 [dependencies]
 gpui = { workspace = true }
-tracing = { workspace = true }
+ktracing = { workspace = true }
