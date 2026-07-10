@@ -4,7 +4,6 @@ mod registry;
 pub use command::*;
 pub use registry::*;
 
-
 use gpui::{App, AppContext, Entity, Global};
 
 pub mod prelude {

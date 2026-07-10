@@ -55,8 +55,8 @@ use command::{Command, CommandProvider, CommandRegistry};
 use gpui::App;
 
 pub fn init(cx: &mut App) {
-    CommandRegistry::global(cx).update(cx, |registry, _cx| {
-        registry.register_provider(ExampleProvider);
+    CommandRegistry::global(cx).update(cx, |registry, cx| {
+        registry.register_provider(ExampleProvider, cx);
     });
 }
 
@@ -65,7 +65,7 @@ pub struct ExampleProvider;
 impl CommandProvider for ExampleProvider {
     type Commands = Vec<Command>;
 
-    fn commands(&self) -> Self::Commands {
+    fn commands(&self, _cx: &mut gpui::Context<CommandRegistry>) -> Self::Commands {
         vec![
             Command::new("example.open", "Open Example"),
             Command::new("example.close", "Close Example"),

@@ -1,11 +1,12 @@
 use collections::{HashMap, hash_map::Entry};
-use gpui::{App, Entity};
+use gpui::{App, Context, Entity};
 
-use crate::{Command,GlobalCommandRegistry};
+use crate::{Command, GlobalCommandRegistry};
 
 pub trait CommandProvider {
     type Commands: IntoIterator<Item = Command>;
-    fn commands(&self) -> Self::Commands;
+
+    fn commands(&self, cx: &mut Context<CommandRegistry>) -> Self::Commands;
 }
 
 pub struct CommandRegistry {
@@ -23,8 +24,8 @@ impl CommandRegistry {
         }
     }
 
-    pub fn register_provider<T: CommandProvider>(&mut self, provider: T) {
-        self.register_commands(provider.commands());
+    pub fn register_provider<T: CommandProvider>(&mut self, provider: T, cx: &mut Context<Self>) {
+        self.register_commands(provider.commands(cx));
     }
 
     pub fn register_command(&mut self, command: Command) {

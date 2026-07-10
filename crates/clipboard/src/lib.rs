@@ -1,9 +1,9 @@
 use command::prelude::*;
-use gpui::App;
+use gpui::{App, Context};
 
 pub fn init(cx: &mut App) {
-    CommandRegistry::global(cx).update(cx, |registry, _cx| {
-        registry.register_provider(Clipboard);
+    CommandRegistry::global(cx).update(cx, |registry, cx| {
+        registry.register_provider(Clipboard, cx);
     });
 }
 
@@ -11,7 +11,8 @@ pub struct Clipboard;
 
 impl CommandProvider for Clipboard {
     type Commands = Vec<Command>;
-    fn commands(&self) -> Vec<Command> {
+
+    fn commands(&self, _cx: &mut Context<CommandRegistry>) -> Self::Commands {
         vec![
             Command::new("clipboard.history", "Clipboard History")
                 .subtitle("Search copied text, links, and snippets")

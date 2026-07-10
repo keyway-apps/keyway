@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     # Foundation crates
+    "crates/assets",
     "crates/cli",
     "crates/collections",
     "crates/command",
@@ -16,6 +17,7 @@ members = [
     "crates/onboarding",
     "crates/paths",
     "crates/ktracing",
+    "crates/ui",
     "crates/util",
     "crates/window",
     "crates/workspace",
@@ -47,6 +49,7 @@ license = "AGPL-3.0"
 #
 
 # Foundation crates
+assets = { path = "crates/assets" }
 collections = { path = "crates/collections" }
 command = { path = "crates/command" }
 config = { path = "crates/config" }
@@ -54,9 +57,10 @@ db = { path = "crates/db" }
 extension = { path = "crates/extension" }
 i18n = { path = "crates/i18n" }
 ipc = { path = "crates/ipc" }
+ktracing = { path = "crates/ktracing" }
 net = { path = "crates/net" }
 paths = { path = "crates/paths" }
-ktracing = { path = "crates/ktracing" }
+ui = { path = "crates/ui" }
 util = { path = "crates/util" }
 window = { path = "crates/window" }
 workspace = { path = "crates/workspace" }
@@ -82,12 +86,13 @@ clap = "4.6"
 dirs = "6"
 futures = "0.3.32"
 gpui = { git = "https://github.com/zed-industries/zed" }
+gpui-component = { git = "https://github.com/longbridge/gpui-component" }
 gpui_platform = { git = "https://github.com/zed-industries/zed" }
 gpui_tokio = { git = "https://github.com/zed-industries/zed" }
 image = "0.25.10"
 nucleo = "0.5"
 once_cell = "1.21.4"
-rust-embed = "8.11"
+rust-embed = { version = "8.11", features = ["include-exclude"] }
 rust-i18n = "4.1"
 rustc-hash = "2.1.3"
 regex = "1.12"
