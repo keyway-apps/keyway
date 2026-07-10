@@ -955,6 +955,7 @@ name = "clipboard"
 version = "0.1.0"
 dependencies = [
  "command",
+ "gpui",
 ]
 
 [[package]]
@@ -1063,7 +1064,6 @@ version = "0.1.0"
 dependencies = [
  "collections 0.1.0",
  "gpui",
- "inventory",
  "serde",
  "tracing",
 ]

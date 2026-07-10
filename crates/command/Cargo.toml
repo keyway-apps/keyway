@@ -10,6 +10,5 @@ license.workspace = true
 collections = { workspace = true }
 
 gpui = { workspace = true }
-inventory = { workspace = true }
 serde = { workspace = true }
 tracing = { workspace = true }

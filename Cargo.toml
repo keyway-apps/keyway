@@ -85,7 +85,6 @@ gpui = { git = "https://github.com/zed-industries/zed" }
 gpui_platform = { git = "https://github.com/zed-industries/zed" }
 gpui_tokio = { git = "https://github.com/zed-industries/zed" }
 image = "0.25.10"
-inventory = "0.3"
 nucleo = "0.5"
 once_cell = "1.21.4"
 rust-embed = "8.11"

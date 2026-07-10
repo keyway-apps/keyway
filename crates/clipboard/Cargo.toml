@@ -8,3 +8,5 @@ license.workspace = true
 
 [dependencies]
 command = { workspace = true }
+
+gpui = { workspace = true }
