@@ -37,6 +37,7 @@ When a package under `crates` is added, removed, renamed, or has its responsibil
 | `crates/onboarding` | `onboarding` | First-run setup, permission guidance, and initialization experience. |
 | `crates/paths` | `paths` | Resolves cross-platform application, configuration, data, cache, log, and extension directories. |
 | `crates/ktracing` | `ktracing` | Logging and tracing initialization with environment filter support, stderr output, and file logging. |
+| `crates/util` | `util` | Shared lightweight utility macros and helpers, including internal module inclusion helpers, that do not belong to a more specific foundation crate. |
 | `crates/window` | `window` | Window lifecycle, window abstraction, OS window primitives, and UI shell boundary. |
 | `crates/workspace` | `workspace` | Main application workspace state, singleton `workspace::contributions::Contribution` entity plus `ContributionHandle`, command palette/search, workspace-scoped action handlers, view host placement, layout, and navigation boundary. |
 

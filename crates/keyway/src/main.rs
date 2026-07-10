@@ -5,6 +5,8 @@ use gpui_platform;
 
 use crate::cli::Cli;
 
+util::internal_modules!(clipboard);
+
 mod cli;
 
 fn main() -> Result<()> {
@@ -22,7 +24,10 @@ fn main() -> Result<()> {
         i18n::init("en");
         gpui_tokio::init(cx);
 
-        
+        clipboard::init();
+
+        command::init(cx);
+
         workspace::init(cx);
     });
 

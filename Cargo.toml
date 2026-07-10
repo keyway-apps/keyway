@@ -1,6 +1,8 @@
 [workspace]
+resolver = "3"
 members = [
     # Foundation crates
+    "crates/cli",
     "crates/collections",
     "crates/command",
     "crates/config",
@@ -9,10 +11,12 @@ members = [
     "crates/extension",
     "crates/i18n",
     "crates/ipc",
+    "crates/keyway",
     "crates/net",
     "crates/onboarding",
     "crates/paths",
     "crates/ktracing",
+    "crates/util",
     "crates/window",
     "crates/workspace",
 
@@ -28,6 +32,7 @@ members = [
     "crates/settings",
     "crates/store",
 ]
+default-members = ["crates/keyway"]
 
 [workspace.package]
 version = "0.1.0"
@@ -52,6 +57,7 @@ ipc = { path = "crates/ipc" }
 net = { path = "crates/net" }
 paths = { path = "crates/paths" }
 ktracing = { path = "crates/ktracing" }
+util = { path = "crates/util" }
 window = { path = "crates/window" }
 workspace = { path = "crates/workspace" }
 

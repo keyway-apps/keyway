@@ -16,9 +16,13 @@ path = "src/main.rs"
 # Workspace member crates
 #
 
+command = { workspace = true }
 i18n = { workspace = true }
 ktracing = { workspace = true }
+util = { workspace = true }
 workspace = { workspace = true }
+
+clipboard = { workspace = true }
 
 #
 # External crates
