@@ -5,7 +5,6 @@ use crate::{Command, GlobalCommandRegistry};
 
 pub trait CommandProvider {
     type Commands: IntoIterator<Item = Command>;
-
     fn commands(&self, cx: &mut Context<CommandRegistry>) -> Self::Commands;
 }
 

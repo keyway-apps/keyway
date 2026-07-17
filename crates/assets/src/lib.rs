@@ -1,4 +1,3 @@
-use anyhow::Context as _;
 use gpui::{AssetSource, Result, SharedString};
 use rust_embed::RustEmbed;
 
@@ -13,20 +12,29 @@ pub struct Assets;
 
 impl AssetSource for Assets {
     fn load(&self, path: &str) -> Result<Option<std::borrow::Cow<'static, [u8]>>> {
-        Self::get(path)
-            .map(|f| Some(f.data))
-            .with_context(|| format!("loading asset at path {path:?}"))
+        if path.is_empty() {
+            return Ok(None);
+        }
+
+        if let Some(file) = Self::get(path) {
+            return Ok(Some(file.data));
+        }
+
+        gpui_component_assets::Assets.load(path)
     }
 
     fn list(&self, path: &str) -> Result<Vec<SharedString>> {
-        Ok(Self::iter()
+        let mut result: Vec<SharedString> = Self::iter()
             .filter_map(|p| {
-                if p.starts_with(path) {
-                    Some(p.into())
-                } else {
-                    None
-                }
+               p.starts_with(path)
+                    .then(|| SharedString::from(p.to_string()))
             })
-            .collect())
+            .collect();
+        
+        if let Ok(component_assets) = gpui_component_assets::Assets.list(path) {
+            result.extend(component_assets);
+        }
+
+        Ok(result)
     }
 }
