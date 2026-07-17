@@ -1,16 +1,75 @@
 use anyhow::Result;
+use futures::prelude::*;
 use gpui::App;
 use gpui_tokio::Tokio;
-use net::UnixListener;
+use net::async_net::{UnixListener};
 use std::{path::PathBuf, sync::mpsc};
+use tarpc::context::Context;
+use tarpc::server::Channel;
 use tarpc::{server::BaseChannel, tokio_serde::formats::Json};
 use tokio_util::codec::LengthDelimitedCodec;
+
+use crate::KeywayService;
+
+pub struct IpcServerHandle {
+    socket_path: PathBuf,
+}
+
+impl Drop for IpcServerHandle {
+    fn drop(&mut self) {
+        if let Err(e) = std::fs::remove_file(&self.socket_path) {
+            // Don't warn if the file doesn't exist - that's expected if the socket
+            // was never created or was already cleaned up
+            if e.kind() != std::io::ErrorKind::NotFound {
+                tracing::warn!("Failed to clean up IPC socket: {}", e);
+            }
+        }
+    }
+}
 
 pub fn get_socket_path() -> PathBuf {
     paths::temp_dir().join("keyway.sock")
 }
 
-pub fn start_server(cx: &App) {
+pub fn is_daemon_running() -> bool {
+    let socket_path = get_socket_path();
+    net::UnixStream::connect(&socket_path).is_ok()
+}
+
+#[derive(Clone)]
+pub struct KeywayServer {}
+
+impl KeywayServer {
+    fn new() -> Self {
+        Self {}
+    }
+}
+
+impl KeywayService for KeywayServer {
+    async fn execute(self, context: Context) -> () {
+        todo!()
+    }
+
+    async fn commands(self, context: Context) -> () {
+        todo!()
+    }
+}
+
+pub fn prepare_socket() -> anyhow::Result<PathBuf> {
+    let socket_path = get_socket_path();
+
+    if socket_path.exists() {
+        if is_daemon_running() {
+            anyhow::bail!("Another instance is already running");
+        }
+        // Remove stale socket
+        std::fs::remove_file(&socket_path)?;
+    }
+
+    Ok(socket_path)
+}
+
+pub fn start_server(cx: &App) -> anyhow::Result<IpcServerHandle> {
     let socket_path = get_socket_path();
     let socket_path_clone = socket_path.clone();
 
@@ -39,13 +98,27 @@ pub fn start_server(cx: &App) {
                 }
             };
 
-            // let framed = tokio_util::codec::Framed::new(stream, LengthDelimitedCodec::new());
-            // let transport = tarpc::serde_transport::new(framed, Json::default());
+            let framed = tokio_util::codec::Framed::new(stream, LengthDelimitedCodec::new());
+            let transport = tarpc::serde_transport::new(framed, Json::default());
 
-            // let channel = BaseChannel::with_defaults(transport);
+            let server = KeywayServer::new();
 
-            // tokio::spawn(channel.execute(server::ServerImpl::new(cx.clone()).serve()));
+            let channel = BaseChannel::with_defaults(transport);
+
+            tokio::spawn(
+                channel
+                    .execute(server.serve())
+                    .for_each(|response| async move {
+                        tokio::spawn(response);
+                    }),
+            );
         }
     })
     .detach();
+
+    match bind_rx.recv() {
+        Ok(Ok(())) => Ok(IpcServerHandle { socket_path }),
+        Ok(Err(e)) => anyhow::bail!("Failed to bind IPC socket: {}", e),
+        Err(_) => anyhow::bail!("IPC server task terminated unexpectedly before binding socket"),
+    }
 }

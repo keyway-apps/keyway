@@ -2,6 +2,8 @@
 
 `command` crate owns Keyway command metadata and the in-process command registry.
 
+The target domain contract, including search-panel visibility, argument rules, and generated CLI exposure, is defined in [`docs/command-design.md`](../../docs/command-design.md).
+
 The application must initialize the registry before feature crates register commands:
 
 ```rust

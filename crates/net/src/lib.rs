@@ -1,7 +1,6 @@
-#[cfg(target_os = "windows")]
-mod windows;
+pub mod async_net;
 
-#[cfg(target_os = "windows")]
-pub use self::windows::{UnixListener, UnixStream};
 #[cfg(not(target_os = "windows"))]
-pub use tokio::net::{UnixListener, UnixStream};
+pub use std::os::unix::net::{UnixListener, UnixStream};
+#[cfg(target_os = "windows")]
+pub use uds_windows::{UnixListener, UnixStream};

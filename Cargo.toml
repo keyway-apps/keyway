@@ -84,7 +84,7 @@ store = { path = "crates/store" }
 anyhow = "1"
 clap = "4.6"
 dirs = "6"
-futures = "0.3.32"
+futures = "0.3"
 gpui = { git = "https://github.com/zed-industries/zed" }
 gpui-component = { git = "https://github.com/longbridge/gpui-component" }
 gpui_platform = { git = "https://github.com/zed-industries/zed" }

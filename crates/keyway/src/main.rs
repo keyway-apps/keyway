@@ -1,24 +1,22 @@
-use anyhow::Result;
-use clap::Parser;
 use gpui::Application;
 use gpui_platform;
 
-use crate::cli::Cli;
+use assets::Assets;
+use ipc::{server::prepare_socket};
 
-mod cli;
-
-fn main() -> Result<()> {
-    let cli = Cli::parse();
-
-    if let Some(_cmd) = cli.command {
-        return Ok(());
-    }
-
+fn main() {
     ktracing::init();
+
+    if let Err(_) = prepare_socket() {
+        // TODO 通过ipc处理命令并直接返回
+        return;
+    }
 
     let app = Application::with_platform(gpui_platform::current_platform(false));
 
-    app.run(move |cx| {
+    app
+        .with_assets(Assets)
+        .run(move |cx| {
         i18n::init("en");
         gpui_tokio::init(cx);
         command::init(cx);
@@ -26,7 +24,9 @@ fn main() -> Result<()> {
         clipboard::init(cx);
 
         workspace::init(cx);
-    });
 
-    Ok(())
+        //  cx.spawn(async move |cx| {
+
+        // });
+    });
 }

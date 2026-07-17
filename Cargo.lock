@@ -2953,6 +2953,7 @@ name = "ipc"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "futures",
  "gpui",
  "gpui_tokio",
  "net",
@@ -3048,6 +3049,7 @@ name = "keyway"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "assets",
  "clap",
  "clipboard",
  "command",
@@ -3055,6 +3057,7 @@ dependencies = [
  "gpui_platform",
  "gpui_tokio",
  "i18n",
+ "ipc",
  "ktracing",
  "util",
  "workspace",
