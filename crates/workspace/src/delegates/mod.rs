@@ -6,6 +6,12 @@ use gpui_component::{
 
 pub struct CommandListDelegate {}
 
+impl CommandListDelegate {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
+
 impl ListDelegate for CommandListDelegate {
     type Item = ListItem;
 

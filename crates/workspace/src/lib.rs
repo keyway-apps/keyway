@@ -3,8 +3,10 @@ use gpui::{
     WindowBounds, WindowKind, WindowOptions, div, prelude::*, px, rgb, size,
 };
 use gpui_component::input::{InputEvent, InputState};
+use gpui_component::list::{List, ListState};
 use gpui_component::{Root, Sizable};
 
+use crate::delegates::CommandListDelegate;
 use crate::state::ViewMode;
 
 mod delegates;
@@ -38,10 +40,15 @@ pub fn init(cx: &mut App) {
 pub struct Workspace {
     pub(crate) view_mode: ViewMode,
     pub(crate) input_state: Entity<InputState>,
+    pub(crate) list_state: Entity<ListState<CommandListDelegate>>,
 }
 
 impl Workspace {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+        let delegate = CommandListDelegate::new();
+
+        let list_state = cx.new(|cx| ListState::new(delegate, window, cx));
+
         let input_state =
             cx.new(|cx| InputState::new(window, cx).placeholder("Search for apps and commands..."));
 
@@ -53,11 +60,13 @@ impl Workspace {
                     tracing::info!("Search changed: {}", text);
                 }
             },
-        ).detach();
+        )
+        .detach();
 
         Self {
             view_mode: Default::default(),
             input_state,
+            list_state,
         }
     }
 }
@@ -85,7 +94,7 @@ impl Render for Workspace {
                             .cleanable(true),
                     ),
             )
-            .child(div().flex_1().size_full().px_2().child(content))
+            .child(div().flex_1().w_full().child(content))
             .child(
                 div()
                     .w_full()
@@ -100,7 +109,7 @@ impl Render for Workspace {
 impl Workspace {
     fn render_content(&mut self) -> AnyElement {
         match self.view_mode {
-            ViewMode::Main => div().child("main").into_any_element(),
+            ViewMode::Main => div().child(List::new(&self.list_state)).into_any_element(),
             ViewMode::View => div().child("view").into_any_element(),
         }
     }
