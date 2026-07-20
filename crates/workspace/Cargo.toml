@@ -9,4 +9,4 @@ license.workspace = true
 [dependencies]
 gpui = { workspace = true }
 gpui-component = { workspace = true }
-ktracing = { workspace = true }
+tracing = { workspace = true }
