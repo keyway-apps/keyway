@@ -1,5 +1,5 @@
-use command::prelude::*;
 use gpui::{App, Context};
+use runtime::prelude::*;
 
 pub fn init(cx: &mut App) {
     CommandRegistry::global(cx).update(cx, |registry, cx| {

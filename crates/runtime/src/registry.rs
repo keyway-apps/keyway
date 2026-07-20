@@ -43,8 +43,8 @@ impl CommandRegistry {
 
     fn insert_command(&mut self, command: Command) {
         match self.commands.entry(command.id.clone()) {
-            Entry::Vacant(e) => {
-                e.insert(command);
+            Entry::Vacant(entry) => {
+                entry.insert(command);
             }
             Entry::Occupied(_) => {
                 tracing::warn!(

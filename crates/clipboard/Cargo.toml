@@ -7,6 +7,6 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
-command = { workspace = true }
+runtime = { workspace = true }
 
 gpui = { workspace = true }

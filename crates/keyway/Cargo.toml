@@ -17,9 +17,9 @@ path = "src/main.rs"
 #
 
 assets = { workspace = true }
-command = { workspace = true }
 i18n = { workspace = true }
 ipc = { workspace = true}
+runtime = { workspace = true }
 ktracing = { workspace = true }
 util = { workspace = true }
 workspace = { workspace = true }

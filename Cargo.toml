@@ -5,9 +5,8 @@ members = [
     "crates/assets",
     "crates/cli",
     "crates/collections",
-    "crates/command",
     "crates/config",
-    "crates/core",
+    "crates/runtime",
     "crates/db",
     "crates/extension",
     "crates/i18n",
@@ -16,6 +15,7 @@ members = [
     "crates/net",
     "crates/onboarding",
     "crates/paths",
+    "crates/theme",
     "crates/ktracing",
     "crates/ui",
     "crates/util",
@@ -51,8 +51,8 @@ license = "AGPL-3.0"
 # Foundation crates
 assets = { path = "crates/assets" }
 collections = { path = "crates/collections" }
-command = { path = "crates/command" }
 config = { path = "crates/config" }
+runtime = { path = "crates/runtime" }
 db = { path = "crates/db" }
 extension = { path = "crates/extension" }
 i18n = { path = "crates/i18n" }
@@ -60,6 +60,7 @@ ipc = { path = "crates/ipc" }
 ktracing = { path = "crates/ktracing" }
 net = { path = "crates/net" }
 paths = { path = "crates/paths" }
+theme = { path = "crates/theme" }
 ui = { path = "crates/ui" }
 util = { path = "crates/util" }
 window = { path = "crates/window" }

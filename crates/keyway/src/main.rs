@@ -22,7 +22,7 @@ fn main() {
 
         gpui_tokio::init(cx);
 
-        command::init(cx);
+        runtime::init(cx);
 
         clipboard::init(cx);
 

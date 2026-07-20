@@ -2,7 +2,7 @@ use gpui::{
     App, AppContext, Bounds, Context, Entity, IntoElement, Render, Window, WindowBounds,
     WindowKind, WindowOptions, div, prelude::*, px, rgb, size,
 };
-use gpui_component::Root;
+use gpui_component::{Root, Sizable};
 use gpui_component::input::InputState;
 
 pub static WIDTH: f32 = 750.0;
@@ -54,15 +54,24 @@ impl Render for Workspace {
             .child(
                 div()
                     .w_full()
-                    .px_2()
-                    .py_3()
+                    .p_2()
                     .border_b_1()
                     .border_color(rgb(0xCCCCCC))
                     .child(
                         gpui_component::input::Input::new(&self.input_state)
+                            .large()
                             .appearance(false)
                             .cleanable(true),
                     ),
+            )
+            .child(div().flex_1().size_full().px_2())
+            .child(
+                div()
+                    .w_full()
+                    .px_2()
+                    .py_2()
+                    .border_t_1()
+                    .border_color(rgb(0xCCCCCC)),
             )
     }
 }

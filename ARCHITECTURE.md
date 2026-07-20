@@ -4,7 +4,7 @@
 
 Keyway is a Rust and GPUI desktop application workspace. The root package, `keyway`, provides the application entry point and currently initializes logging, internationalization, and the GPUI application runtime.
 
-The `crates` directory is split into foundation capabilities and feature modules. Foundation crates provide shared boundaries such as paths, logging, collection types, commands, actions, and extensions. Feature crates implement concrete quick-launch capabilities such as calculator, clipboard, file search, screenshots, settings, and store functionality.
+The `crates` directory is split into foundation capabilities and feature modules. Foundation crates provide shared boundaries such as paths, logging, collection types, runtime domain types, actions, and extensions. Feature crates implement concrete quick-launch capabilities such as calculator, clipboard, file search, screenshots, settings, and store functionality.
 
 ## Documentation Rule
 
@@ -25,12 +25,11 @@ When a package under `crates` is added, removed, renamed, or has its responsibil
 | `crates/action` | `action` | Defines typed action identity, GPUI-compatible action construction, action metadata/schema, and action dispatch boundaries reused by commands, hotkeys, extensions, and feature modules. |
 | `crates/bin` | `bin` | Auxiliary binary entry package; currently a placeholder entry point for future CLI or development tools. |
 | `crates/collections` | `collections` | Provides common collection aliases and re-exports, currently defaulting to `rustc_hash` `FxHashMap` and `FxHashSet`. |
-| `crates/command` | `command` | Owns the serializable Command domain model, search-panel visibility/input invariants, argument and output schemas, CLI exposure metadata, schema versioning, and the validated Command Catalog/registry. See [`docs/command-design.md`](./docs/command-design.md). |
 | `crates/config` | `config` | Owns configuration structures, loading, validation, and persistence boundaries. |
-| `crates/core` | `core` | Holds shared core domain types, daemon lifecycle logic, keymap/global-hotkey runtime services, Command execution bindings, and dispatch orchestration; consumes the validated Command Catalog but does not own the Command model. |
+| `crates/runtime` | `runtime` | Owns command, view, keymap, and global-hotkey registration alongside shared runtime domain types, daemon lifecycle services, Command execution bindings, and dispatch orchestration. See [`docs/command-design.md`](./docs/command-design.md). |
 | `crates/db` | `db` | Persistence and database access layer boundary. |
 | `crates/extension` | `extension` | Extension system boundary, including extension manifests, loading, runtime contracts, and sandbox integration. |
-| `crates/hotkey` | `hotkey` | Transitional placeholder; default bindings reference stable Command IDs, while keymap/global-hotkey runtime services belong to `core`. |
+| `crates/hotkey` | `hotkey` | Transitional placeholder; default bindings reference stable Command IDs, while keymap/global-hotkey services belong to `runtime`. |
 | `crates/i18n` | `i18n` | Internationalization entry point; wraps `rust-i18n` locale initialization and re-exports translation macros. |
 | `crates/ipc` | `ipc` | Owns the typed tarpc IPC protocol, local endpoint policy integration, daemon client helpers, and server transport adapters for daemon requests. |
 | `crates/net` | `net` | Keyway-owned local IPC transport shim; exposes UnixListener/UnixStream types backed by Unix domain sockets on Unix platforms and `uds_windows` on Windows. This crate intentionally stays small instead of depending on Zed's internal `net` crate. |
