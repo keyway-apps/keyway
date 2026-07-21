@@ -1,5 +1,5 @@
 [package]
-name = "extension"
+name = "keyway_extension"
 
 version.workspace = true
 edition.workspace = true

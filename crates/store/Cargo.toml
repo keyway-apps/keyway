@@ -1,5 +1,5 @@
 [package]
-name = "store"
+name = "keyway_store"
 
 version.workspace = true
 edition.workspace = true

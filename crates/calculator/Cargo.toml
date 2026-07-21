@@ -1,5 +1,5 @@
 [package]
-name = "calculator"
+name = "keyway_calculator"
 
 version.workspace = true
 edition.workspace = true

@@ -1,24 +1,23 @@
-## Runtime
+## Core
 
-The `runtime` crate owns Keyway's command, view, and hotkey registries alongside
-the application's shared runtime orchestration.
+The `keyway_core` crate owns Keyway's shared command model and command registry.
 
 The target command contract, including search-panel visibility, argument rules,
 and generated CLI exposure, is defined in
 [`docs/command-design.md`](../../docs/command-design.md).
 
-Initialize runtime services before feature crates register commands:
+Initialize core services before feature crates register commands:
 
 ```rust
 app.run(move |cx| {
-    runtime::init(cx);
+    keyway_core::init(cx);
 
-    clipboard::init(cx);
+    keyway_clipboard::init(cx);
 });
 ```
 
 ```rust
-use runtime::{Command, CommandRegistry};
+use keyway_core::{Command, CommandRegistry};
 use gpui::App;
 
 pub fn init(cx: &mut App) {

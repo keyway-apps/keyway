@@ -2,7 +2,7 @@ use anyhow::Result;
 use futures::prelude::*;
 use gpui::App;
 use gpui_tokio::Tokio;
-use net::async_net::{UnixListener};
+use keyway_net::async_net::UnixListener;
 use std::{path::PathBuf, sync::mpsc};
 use tarpc::context::Context;
 use tarpc::server::Channel;
@@ -28,12 +28,12 @@ impl Drop for IpcServerHandle {
 }
 
 pub fn get_socket_path() -> PathBuf {
-    paths::temp_dir().join("keyway.sock")
+    keyway_paths::temp_dir().join("keyway.sock")
 }
 
 pub fn is_daemon_running() -> bool {
     let socket_path = get_socket_path();
-    net::UnixStream::connect(&socket_path).is_ok()
+    keyway_net::UnixStream::connect(&socket_path).is_ok()
 }
 
 #[derive(Clone)]

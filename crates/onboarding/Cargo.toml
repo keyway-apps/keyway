@@ -1,5 +1,5 @@
 [package]
-name = "onboarding"
+name = "keyway_onboarding"
 
 version.workspace = true
 edition.workspace = true

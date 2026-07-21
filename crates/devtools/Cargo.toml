@@ -1,5 +1,5 @@
 [package]
-name = "devtools"
+name = "keyway_devtools"
 
 version.workspace = true
 edition.workspace = true

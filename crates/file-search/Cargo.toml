@@ -1,5 +1,5 @@
 [package]
-name = "file_search"
+name = "keyway_file_search"
 
 version.workspace = true
 edition.workspace = true

@@ -1,5 +1,5 @@
 [package]
-name = "clipboard"
+name = "keyway_clipboard"
 
 version.workspace = true
 edition.workspace = true
@@ -7,6 +7,6 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
-runtime = { workspace = true }
+keyway_core = { workspace = true }
 
 gpui = { workspace = true }

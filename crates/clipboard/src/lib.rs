@@ -1,5 +1,5 @@
 use gpui::{App, Context};
-use runtime::prelude::*;
+use keyway_core::prelude::*;
 
 pub fn init(cx: &mut App) {
     CommandRegistry::global(cx).update(cx, |registry, cx| {

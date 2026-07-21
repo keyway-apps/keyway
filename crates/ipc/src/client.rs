@@ -1,5 +1,5 @@
 use crate::{KeywayServiceClient, server::get_socket_path};
-use net::async_net::UnixStream;
+use keyway_net::async_net::UnixStream;
 use tarpc::client;
 use tarpc::context;
 use tarpc::tokio_serde::formats::Json;

@@ -1,5 +1,5 @@
 [package]
-name = "i18n"
+name = "keyway_i18n"
 
 version.workspace = true
 edition.workspace = true

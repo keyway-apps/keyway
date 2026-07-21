@@ -1,5 +1,5 @@
 [package]
-name = "assets"
+name = "keyway_assets"
 
 version.workspace = true
 edition.workspace = true

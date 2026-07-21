@@ -16,15 +16,15 @@ path = "src/main.rs"
 # Workspace member crates
 #
 
-assets = { workspace = true }
-i18n = { workspace = true }
-ipc = { workspace = true}
-runtime = { workspace = true }
-ktracing = { workspace = true }
-util = { workspace = true }
-workspace = { workspace = true }
+keyway_assets = { workspace = true }
+keyway_i18n = { workspace = true }
+keyway_ipc = { workspace = true }
+keyway_core = { workspace = true }
+keyway_ktracing = { workspace = true }
+keyway_util = { workspace = true }
+keyway_workspace = { workspace = true }
 
-clipboard = { workspace = true }
+keyway_clipboard = { workspace = true }
 
 #
 # External crates

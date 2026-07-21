@@ -1,5 +1,5 @@
 [package]
-name = "ktracing"
+name = "keyway_ktracing"
 
 version.workspace = true
 edition.workspace = true
@@ -7,7 +7,7 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
-paths = { workspace = true }
+keyway_paths = { workspace = true }
 tracing = { workspace = true }
 tracing-appender = { workspace = true }
 tracing-log = { workspace = true }

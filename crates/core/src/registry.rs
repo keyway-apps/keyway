@@ -1,5 +1,5 @@
-use collections::{HashMap, hash_map::Entry};
 use gpui::{App, Context, Entity};
+use keyway_collections::{HashMap, hash_map::Entry};
 
 use crate::{Command, GlobalCommandRegistry};
 

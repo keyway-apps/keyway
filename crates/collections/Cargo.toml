@@ -1,5 +1,5 @@
 [package]
-name = "collections"
+name = "keyway_collections"
 
 version.workspace = true
 edition.workspace = true
