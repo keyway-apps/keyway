@@ -6,6 +6,8 @@ use gpui_component::input::{InputEvent, InputState};
 use gpui_component::list::{List, ListState};
 use gpui_component::{Root, Sizable};
 
+use keyway_core::{Command, CommandRegistry};
+
 use crate::delegates::CommandListDelegate;
 use crate::state::ViewMode;
 
@@ -40,24 +42,42 @@ pub fn init(cx: &mut App) {
 pub struct Workspace {
     pub(crate) view_mode: ViewMode,
     pub(crate) input_state: Entity<InputState>,
-    pub(crate) list_state: Entity<ListState<CommandListDelegate>>,
+    pub(crate) command_list_state: Entity<ListState<CommandListDelegate>>,
 }
 
 impl Workspace {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
-        let delegate = CommandListDelegate::new();
+        let registry = CommandRegistry::global(cx);
 
-        let list_state = cx.new(|cx| ListState::new(delegate, window, cx));
+        let commands: Vec<Command> = registry.read(cx).visible_commands().cloned().collect();
+
+        let delegate = CommandListDelegate::new(commands.clone());
+
+        let command_list_state = cx.new(|cx| ListState::new(delegate, window, cx));
+
+        let list_for_registry = command_list_state.clone();
+        cx.observe(&registry, move |_this, registry, cx| {
+            let commands = registry.read(cx).visible_commands().cloned().collect::<Vec<_>>();
+            list_for_registry.update(cx, |list, cx| {
+                list.delegate_mut().replace_commands(commands);
+                cx.notify();
+            });
+        })
+        .detach();
 
         let input_state =
             cx.new(|cx| InputState::new(window, cx).placeholder("Search for apps and commands..."));
 
+        let list_for_input = command_list_state.clone();
         cx.subscribe(
             &input_state,
             move |_this, input: Entity<InputState>, event: &InputEvent, cx: &mut Context<Self>| {
                 if let InputEvent::Change = event {
                     let text = input.read(cx).value().to_string();
-                    tracing::info!("Search changed: {}", text);
+                    list_for_input.update(cx, |list, cx| {
+                        list.delegate_mut().set_query(text);
+                        cx.notify();
+                    });
                 }
             },
         )
@@ -66,7 +86,7 @@ impl Workspace {
         Self {
             view_mode: Default::default(),
             input_state,
-            list_state,
+            command_list_state,
         }
     }
 }
@@ -109,7 +129,15 @@ impl Render for Workspace {
 impl Workspace {
     fn render_content(&mut self) -> AnyElement {
         match self.view_mode {
-            ViewMode::Main => div().child(List::new(&self.list_state)).into_any_element(),
+            // The intermediate container needs an explicit size. Without it,
+            // the List's `size_full` has no definite height to resolve against
+            // and the virtual list can render as a zero-height child.
+            ViewMode::Main => div()
+                .size_full()
+                .overflow_hidden()
+                .p_2()
+                .child(List::new(&self.command_list_state).size_full())
+                .into_any_element(),
             ViewMode::View => div().child("view").into_any_element(),
         }
     }

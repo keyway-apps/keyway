@@ -9,6 +9,10 @@ license.workspace = true
 [dependencies]
 keyway_collections = { workspace = true }
 
+anyhow = { workspace = true }
 gpui = { workspace = true }
 serde = { workspace = true }
 tracing = { workspace = true }
+
+[dev-dependencies]
+gpui = { workspace = true, features = ["test-support"] }

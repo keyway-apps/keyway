@@ -1,13 +1,11 @@
 mod command;
-mod registry;
 
 pub use command::*;
-pub use registry::*;
 
 use gpui::{App, AppContext, Entity, Global};
 
 pub mod prelude {
-    pub use super::{Command, CommandProvider, CommandRegistry};
+    pub use super::{Command, CommandBuilder, CommandRegistry};
 }
 
 pub fn init(cx: &mut App) {
