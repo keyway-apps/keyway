@@ -27,14 +27,16 @@ impl CommandFilter {
         Self { matcher }
     }
 
-    pub fn filter_with_scores(
+    pub fn filter_with_scores<'a>(
         &mut self,
-        commands: &[Command],
+        commands: impl IntoIterator<Item = &'a Command>,
         query: &str,
     ) -> Vec<FilteredCommand> {
+        let commands = commands.into_iter();
         if query.trim().is_empty() {
-            return (0..commands.len())
-                .map(|index| FilteredCommand { index, score: 0 })
+            return commands
+                .enumerate()
+                .map(|(index, _)| FilteredCommand { index, score: 0 })
                 .collect();
         }
 
@@ -48,7 +50,6 @@ impl CommandFilter {
 
         let mut buf = Vec::new();
         let mut scored: Vec<FilteredCommand> = commands
-            .iter()
             .enumerate()
             .filter_map(|(index, command)| {
                 self.score_command(&pattern, command, &mut buf)
@@ -72,7 +73,6 @@ impl CommandFilter {
         command: &Command,
         buf: &mut Vec<char>,
     ) -> Option<u16> {
-
         let scores = command
             .search_terms()
             .into_iter()

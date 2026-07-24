@@ -1,1 +1,3 @@
-mod icon;
+mod components;
+
+pub use components::*;

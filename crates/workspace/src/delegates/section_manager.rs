@@ -32,7 +32,10 @@ impl SectionManager {
         self.filtered = filtered;
         self.all_count = all_count;
         self.query_is_empty = query.trim().is_empty();
-        self.recommended_count = self.filtered.len().min(if self.query_is_empty { 5 } else { 3 });
+        self.recommended_count = self
+            .filtered
+            .len()
+            .min(if self.query_is_empty { 5 } else { 3 });
     }
 
     pub fn sections(&self) -> Vec<SectionType> {
@@ -46,23 +49,11 @@ impl SectionManager {
         }
     }
 
-    pub fn sections_count(&self) -> usize {
-        self.sections().len()
-    }
-
-    pub fn section_type_at(&self, section: usize) -> Option<SectionType> {
-        self.sections().get(section).copied()
-    }
-
     pub fn section_item_count(&self, section: SectionType) -> usize {
         match section {
-            SectionType::BestMatch => {
-                usize::from(!self.query_is_empty) * self.filtered.len()
-            }
+            SectionType::BestMatch => usize::from(!self.query_is_empty) * self.filtered.len(),
             SectionType::All => self.all_count,
-            SectionType::Recommended => {
-                usize::from(self.query_is_empty) * self.recommended_count
-            }
+            SectionType::Recommended => usize::from(self.query_is_empty) * self.recommended_count,
         }
     }
 
@@ -78,7 +69,6 @@ impl SectionManager {
             _ => None,
         }
     }
-
 }
 
 #[cfg(test)]
@@ -107,7 +97,10 @@ mod tests {
     fn empty_query_has_all_and_recommended() {
         let mut manager = SectionManager::default();
         manager.update((0..6).map(result).collect(), 6, "");
-        assert_eq!(manager.sections(), [SectionType::Recommended, SectionType::All]);
+        assert_eq!(
+            manager.sections(),
+            [SectionType::Recommended, SectionType::All]
+        );
         assert_eq!(manager.section_item_count(SectionType::Recommended), 5);
     }
 }
