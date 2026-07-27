@@ -12,7 +12,7 @@ pub fn init(cx: &mut App) {
 pub struct ClipboardModule;
 
 impl Module for ClipboardModule {
-    fn build(&self, context: &mut ModuleContext, cx: &mut Context<ModuleContext>) -> Result<()> {
+    fn build(&mut self, context: &mut ModuleContext, cx: &mut Context<Self>) -> Result<()> {
         let command = CommandBuilder::new("clipboard.history", "Clipboard History")
             .description("Open clipboard history and select an item to paste.")
             .keywords(["copy", "history"])

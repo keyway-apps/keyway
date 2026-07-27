@@ -1,6 +1,7 @@
-`ModuleContext` owns one scoped `CommandRegistry`. Module code mutates commands
-through `ModuleContext` so GPUI observers are notified, while consumers can use
-`ModuleContext::command_registry` for read-only command queries.
+`ModuleContext` owns one scoped `CommandRegistry`. Each `Module` is backed by its
+own GPUI entity, so lifecycle methods receive `Context<Self>`. Module code mutates
+commands through `ModuleContext` so GPUI observers are notified, while consumers
+can use `ModuleContext::command_registry` for read-only command queries.
 
 ```rust
 use gpui::{App, Context};
@@ -41,9 +42,9 @@ pub struct ClipboardModule;
 
 impl Module for ClipboardModule {
     fn build(
-        &self,
+        &mut self,
         mc: &mut ModuleContext,
-        cx: &mut Context<ModuleContext>,
+        cx: &mut Context<Self>,
     ) -> anyhow::Result<()> {
         let command = CommandBuilder::new("clipboard.history", "Clipboard History")
             .description("Open clipboard history and select an item to paste.")

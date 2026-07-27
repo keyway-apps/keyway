@@ -19,7 +19,7 @@ pub mod prelude {
 }
 
 pub fn init(cx: &mut App) {
-    let store = cx.new(|cx| ModuleStore::new(cx));
+    let store = cx.new(ModuleStore::new);
     cx.set_global(GlobalModuleStore(store));
 }
 

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use collections::{HashMap, hash_map::Entry};
-use gpui::Context;
+use gpui::{App, Context};
 use serde::{Deserialize, Serialize};
 
 use crate::ModuleContext;
@@ -231,9 +231,11 @@ impl CommandRegistry {
         I: IntoIterator<Item = S>,
         S: AsRef<str>,
     {
-        command_ids.into_iter().fold(false, |removed, command_id| {
-            self.remove_command(command_id.as_ref()) || removed
-        })
+        let mut removed = false;
+        for command_id in command_ids {
+            removed |= self.remove_command(command_id.as_ref());
+        }
+        removed
     }
 
     fn remove_command(&mut self, command_id: &str) -> bool {
@@ -279,30 +281,25 @@ impl ModuleContext {
         &self.command_registry
     }
 
-    pub fn register_command(
-        &mut self,
-        command: Command,
-        action: impl CommandAction,
-        cx: &mut Context<Self>,
-    ) {
+    pub fn register_command(&mut self, command: Command, action: impl CommandAction, cx: &mut App) {
         if self.command_registry.register_command(command, action) {
-            cx.notify();
+            self.notify(cx);
         }
     }
 
-    pub fn unregister_command(&mut self, command_id: &str, cx: &mut Context<Self>) {
+    pub fn unregister_command(&mut self, command_id: &str, cx: &mut App) {
         if self.command_registry.remove_command(command_id) {
-            cx.notify();
+            self.notify(cx);
         }
     }
 
-    pub fn unregister_commands<I, S>(&mut self, command_ids: I, cx: &mut Context<Self>)
+    pub fn unregister_commands<I, S>(&mut self, command_ids: I, cx: &mut App)
     where
         I: IntoIterator<Item = S>,
         S: AsRef<str>,
     {
         if self.command_registry.unregister_commands(command_ids) {
-            cx.notify();
+            self.notify(cx);
         }
     }
 
