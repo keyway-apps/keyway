@@ -1,5 +1,5 @@
 [package]
-name = "keyway_agent"
+name = "agent"
 
 version.workspace = true
 edition.workspace = true

@@ -1,21 +1,25 @@
-use gpui::App;
-use keyway_core::prelude::*;
+use anyhow::Result;
+use gpui::{App, Context};
+use module::prelude::*;
 
 pub fn init(cx: &mut App) {
-    Clipboard::new(cx);
+    ModuleStore::global(cx).update(cx, |store, cx| {
+        store.add::<ClipboardModule>(cx);
+    });
 }
 
-pub struct Clipboard;
+#[derive(Default)]
+pub struct ClipboardModule;
 
-impl Clipboard {
-    fn new(cx: &mut App) {
+impl Module for ClipboardModule {
+    fn build(&self, context: &mut ModuleContext, cx: &mut Context<ModuleContext>) -> Result<()> {
         let command = CommandBuilder::new("clipboard.history", "Clipboard History")
             .description("Open clipboard history and select an item to paste.")
             .keywords(["copy", "history"])
             .build();
 
-        CommandRegistry::global(cx).update(cx, |registry, cx| {
-            registry.register_command(cx, command, |_, _| Ok(()));
-        });
+        context.register_command(command, |_actions, _context, _cx| Ok(()), cx);
+
+        Ok(())
     }
 }

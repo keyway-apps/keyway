@@ -1,5 +1,5 @@
 [package]
-name = "keyway_emoji"
+name = "emoji"
 
 version.workspace = true
 edition.workspace = true

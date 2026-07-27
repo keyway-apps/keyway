@@ -3,8 +3,8 @@ use gpui_component::{
     IndexPath,
     list::{ListDelegate, ListItem, ListState},
 };
-use keyway_core::Command;
-use keyway_ui::{ItemList, ItemListSection, ItemListState};
+use module::Command;
+use ui::{ItemList, ItemListSection, ItemListState};
 
 use super::{command_filter::CommandFilter, section_manager::SectionManager};
 

@@ -6,7 +6,7 @@ use gpui_component::input::{InputEvent, InputState};
 use gpui_component::list::{List, ListState};
 use gpui_component::{Root, Sizable};
 
-use keyway_core::{Command, CommandRegistry};
+use module::{Command, ModuleStore};
 
 use crate::delegates::CommandListDelegate;
 use crate::state::ViewMode;
@@ -47,18 +47,28 @@ pub struct Workspace {
 
 impl Workspace {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
-        let registry = CommandRegistry::global(cx);
+        let module_context = ModuleStore::global(cx).read(cx).context();
 
-        let commands: Vec<Command> = registry.read(cx).visible_commands().cloned().collect();
+        let commands: Vec<Command> = module_context
+            .read(cx)
+            .command_registry()
+            .visible_commands()
+            .cloned()
+            .collect();
 
         let delegate = CommandListDelegate::new(commands.clone());
 
         let command_list_state = cx.new(|cx| ListState::new(delegate, window, cx));
 
-        let list_for_registry = command_list_state.clone();
-        cx.observe(&registry, move |_this, registry, cx| {
-            let commands = registry.read(cx).visible_commands().cloned().collect::<Vec<_>>();
-            list_for_registry.update(cx, |list, cx| {
+        let list_for_context = command_list_state.clone();
+        cx.observe(&module_context, move |_this, module_context, cx| {
+            let commands = module_context
+                .read(cx)
+                .command_registry()
+                .visible_commands()
+                .cloned()
+                .collect::<Vec<_>>();
+            list_for_context.update(cx, |list, cx| {
                 list.delegate_mut().replace_commands(commands);
                 cx.notify();
             });

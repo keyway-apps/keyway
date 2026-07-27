@@ -1,4 +1,4 @@
-use keyway_core::Command;
+use module::Command;
 use nucleo::{
     Config, Matcher, Utf32Str,
     pattern::{Atom, AtomKind, CaseMatching, Normalization},

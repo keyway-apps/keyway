@@ -1,5 +1,5 @@
 [package]
-name = "keyway_theme"
+name = "theme"
 
 version.workspace = true
 edition.workspace = true

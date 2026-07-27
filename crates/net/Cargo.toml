@@ -1,5 +1,5 @@
 [package]
-name = "keyway_net"
+name = "net"
 
 version.workspace = true
 edition.workspace = true

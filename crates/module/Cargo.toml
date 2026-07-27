@@ -1,5 +1,5 @@
 [package]
-name = "keyway_core"
+name = "module"
 
 version.workspace = true
 edition.workspace = true
@@ -7,7 +7,8 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
-keyway_collections = { workspace = true }
+collections = { workspace = true }
+util = { workspace = true }
 
 anyhow = { workspace = true }
 gpui = { workspace = true }

@@ -1,5 +1,5 @@
 [package]
-name = "keyway_screenshot"
+name = "screenshot"
 
 version.workspace = true
 edition.workspace = true

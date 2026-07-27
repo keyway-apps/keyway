@@ -1,5 +1,5 @@
 [package]
-name = "keyway_settings"
+name = "settings"
 
 version.workspace = true
 edition.workspace = true

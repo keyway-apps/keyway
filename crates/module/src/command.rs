@@ -1,10 +1,10 @@
-use gpui::{App, Context, Entity};
-use serde::{Deserialize, Serialize};
 use std::rc::Rc;
 
-use keyway_collections::{HashMap, hash_map::Entry};
+use collections::{HashMap, hash_map::Entry};
+use gpui::Context;
+use serde::{Deserialize, Serialize};
 
-use crate::GlobalCommandRegistry;
+use crate::ModuleContext;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Command {
@@ -29,18 +29,18 @@ impl Command {
     pub fn search_terms(&self) -> Vec<&str> {
         let mut terms = vec![self.title.as_str()];
 
-        self.subtitle
-            .as_ref()
-            .map(|subtitle| terms.push(subtitle.as_str()));
-        self.category
-            .as_ref()
-            .map(|category| terms.push(category.as_str()));
-        self.description
-            .as_ref()
-            .map(|description| terms.push(description.as_str()));
-        self.keywords
-            .as_ref()
-            .map(|keywords| terms.extend(keywords.iter().map(|keyword| keyword.as_str())));
+        if let Some(subtitle) = &self.subtitle {
+            terms.push(subtitle);
+        }
+        if let Some(category) = &self.category {
+            terms.push(category);
+        }
+        if let Some(description) = &self.description {
+            terms.push(description);
+        }
+        if let Some(keywords) = &self.keywords {
+            terms.extend(keywords.iter().map(String::as_str));
+        }
 
         terms
     }
@@ -153,7 +153,7 @@ impl CommandBuilder {
         self
     }
 
-    pub fn visible_by_default(mut self) -> Self {
+    pub fn hidden_by_default(mut self) -> Self {
         self.visible_by_default = false;
         self
     }
@@ -176,55 +176,44 @@ impl CommandBuilder {
 }
 
 pub trait CommandAction:
-    Fn(&mut Actions, &mut Context<App>) -> anyhow::Result<(), anyhow::Error> + 'static
+    Fn(&mut Actions, &mut ModuleContext, &mut Context<ModuleContext>) -> anyhow::Result<()> + 'static
 {
 }
-impl<F> CommandAction for F where
-    F: Fn(&mut Actions, &mut Context<App>) -> anyhow::Result<(), anyhow::Error> + 'static
-{
-}
-// pub type CommandAction = Fn(&mut Actions, &mut Context<App>) -> anyhow::Result<(), anyhow::Error>;
 
+impl<F> CommandAction for F where
+    F: Fn(&mut Actions, &mut ModuleContext, &mut Context<ModuleContext>) -> anyhow::Result<()>
+        + 'static
+{
+}
+
+#[derive(Default)]
 pub struct Actions {
     query: Option<String>,
 }
 
+impl Actions {
+    pub fn query(&self) -> Option<&str> {
+        self.query.as_deref()
+    }
+
+    pub fn set_query(&mut self, query: impl Into<String>) {
+        self.query = Some(query.into());
+    }
+}
+
+#[derive(Default)]
 pub struct CommandRegistry {
     commands: HashMap<String, Command>,
     actions: HashMap<String, Rc<dyn CommandAction>>,
 }
 
 impl CommandRegistry {
-    pub fn global(cx: &App) -> Entity<Self> {
-        cx.global::<GlobalCommandRegistry>().0.clone()
-    }
-
-    pub(crate) fn new() -> Self {
-        Self {
-            commands: HashMap::default(),
-            actions: HashMap::default(),
-        }
-    }
-
-    pub fn register_command(
-        &mut self,
-        cx: &mut Context<Self>,
-        command: Command,
-        action: impl CommandAction,
-    ) {
+    fn register_command(&mut self, command: Command, action: impl CommandAction) -> bool {
         let command_id = command.id.clone();
-        let inserted = self.insert_command(command);
-
-        if inserted {
-            self.actions.insert(command_id, Rc::new(action));
-            cx.notify();
-        }
-    }
-
-    fn insert_command(&mut self, command: Command) -> bool {
         match self.commands.entry(command.id.clone()) {
             Entry::Vacant(entry) => {
                 entry.insert(command);
+                self.actions.insert(command_id, Rc::new(action));
                 true
             }
             Entry::Occupied(_) => {
@@ -237,21 +226,14 @@ impl CommandRegistry {
         }
     }
 
-    pub fn unregister_command(&mut self, command_id: &str, cx: &mut Context<Self>) {
-        self.remove_command(command_id).then(|| cx.notify());
-    }
-
-    pub fn unregister_commands<I, S>(&mut self, command_ids: I, cx: &mut Context<Self>)
+    fn unregister_commands<I, S>(&mut self, command_ids: I) -> bool
     where
         I: IntoIterator<Item = S>,
         S: AsRef<str>,
     {
-        command_ids
-            .into_iter()
-            .fold(false, |acc, command_id| {
-                self.remove_command(command_id.as_ref()) || acc
-            })
-            .then(|| cx.notify());
+        command_ids.into_iter().fold(false, |removed, command_id| {
+            self.remove_command(command_id.as_ref()) || removed
+        })
     }
 
     fn remove_command(&mut self, command_id: &str) -> bool {
@@ -271,26 +253,113 @@ impl CommandRegistry {
         }
     }
 
-    pub fn execute_command(&self, command_id: &str, cx: Context<App>) {
-        let action = self.actions.get(command_id);
-        if let Some(action) = action {
-            // action();
-        }
+    fn action(&self, command_id: &str) -> Option<Rc<dyn CommandAction>> {
+        self.actions.get(command_id).cloned()
     }
 
     pub fn visible_commands(&self) -> impl Iterator<Item = &Command> {
         self.commands
             .values()
-            .filter(|cmd| !cmd.disabled_by_default && cmd.visible_by_default)
+            .filter(|command| !command.disabled_by_default && command.visible_by_default)
     }
 
     pub fn enabled_commands(&self) -> impl Iterator<Item = &Command> {
         self.commands
             .values()
-            .filter(|cmd| !cmd.disabled_by_default)
+            .filter(|command| !command.disabled_by_default)
     }
 
     pub fn commands(&self) -> impl Iterator<Item = &Command> {
         self.commands.values()
+    }
+}
+
+impl ModuleContext {
+    pub fn command_registry(&self) -> &CommandRegistry {
+        &self.command_registry
+    }
+
+    pub fn register_command(
+        &mut self,
+        command: Command,
+        action: impl CommandAction,
+        cx: &mut Context<Self>,
+    ) {
+        if self.command_registry.register_command(command, action) {
+            cx.notify();
+        }
+    }
+
+    pub fn unregister_command(&mut self, command_id: &str, cx: &mut Context<Self>) {
+        if self.command_registry.remove_command(command_id) {
+            cx.notify();
+        }
+    }
+
+    pub fn unregister_commands<I, S>(&mut self, command_ids: I, cx: &mut Context<Self>)
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        if self.command_registry.unregister_commands(command_ids) {
+            cx.notify();
+        }
+    }
+
+    pub fn execute_command(
+        &mut self,
+        command_id: &str,
+        actions: &mut Actions,
+        cx: &mut Context<Self>,
+    ) -> anyhow::Result<()> {
+        let action = self
+            .command_registry
+            .action(command_id)
+            .ok_or_else(|| anyhow::anyhow!("command not found: {command_id}"))?;
+        action(actions, self, cx)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{cell::Cell, rc::Rc};
+
+    use super::*;
+    use crate::{ModuleStore, init};
+
+    #[gpui::test]
+    async fn module_context_registers_and_executes_commands(cx: &mut gpui::TestAppContext) {
+        let executed = Rc::new(Cell::new(false));
+        let action_executed = executed.clone();
+
+        cx.update(|cx| {
+            init(cx);
+
+            let store = ModuleStore::global(cx);
+            let module_context = store.read(cx).context();
+
+            module_context.update(cx, |context, cx| {
+                context.register_command(
+                    Command::new("test.command", "Test Command"),
+                    move |actions, context, _cx| {
+                        actions.set_query("executed");
+                        assert_eq!(context.command_registry().commands().count(), 1);
+                        action_executed.set(true);
+                        Ok(())
+                    },
+                    cx,
+                );
+
+                let mut actions = Actions::default();
+                context
+                    .execute_command("test.command", &mut actions, cx)
+                    .unwrap();
+
+                assert_eq!(actions.query(), Some("executed"));
+                assert_eq!(context.command_registry().visible_commands().count(), 1);
+            });
+        });
+
+        assert!(executed.get());
     }
 }

@@ -1,5 +1,5 @@
 [package]
-name = "keyway_ui"
+name = "ui"
 
 version.workspace = true
 edition.workspace = true

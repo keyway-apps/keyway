@@ -89,7 +89,7 @@ where
     S: tracing::Subscriber,
     S: for<'span> tracing_subscriber::registry::LookupSpan<'span>,
 {
-    let log_file = keyway_paths::log_file();
+    let log_file = paths::log_file();
     let logs_dir = log_file
         .parent()
         .expect("log file path should include a parent directory");

@@ -1,5 +1,5 @@
 [package]
-name = "keyway_paths"
+name = "paths"
 
 version.workspace = true
 edition.workspace = true

@@ -6,7 +6,6 @@ members = [
     "crates/cli",
     "crates/collections",
     "crates/config",
-    "crates/core",
     "crates/db",
     "crates/extension",
     "crates/i18n",
@@ -17,6 +16,7 @@ members = [
     "crates/paths",
     "crates/theme",
     "crates/ktracing",
+    "crates/module",
     "crates/ui",
     "crates/util",
     "crates/window",
@@ -49,34 +49,34 @@ license = "AGPL-3.0"
 #
 
 # Foundation crates
-keyway_assets = { path = "crates/assets" }
-keyway_collections = { path = "crates/collections" }
-keyway_config = { path = "crates/config" }
-keyway_core = { path = "crates/core" }
-keyway_db = { path = "crates/db" }
-keyway_extension = { path = "crates/extension" }
-keyway_i18n = { path = "crates/i18n" }
-keyway_ipc = { path = "crates/ipc" }
-keyway_ktracing = { path = "crates/ktracing" }
-keyway_net = { path = "crates/net" }
-keyway_paths = { path = "crates/paths" }
-keyway_theme = { path = "crates/theme" }
-keyway_ui = { path = "crates/ui" }
-keyway_util = { path = "crates/util" }
-keyway_window = { path = "crates/window" }
-keyway_workspace = { path = "crates/workspace" }
+assets = { path = "crates/assets" }
+collections = { path = "crates/collections" }
+config = { path = "crates/config" }
+db = { path = "crates/db" }
+extension = { path = "crates/extension" }
+i18n = { path = "crates/i18n" }
+ipc = { path = "crates/ipc" }
+ktracing = { path = "crates/ktracing" }
+module = { path = "crates/module" }
+net = { path = "crates/net" }
+paths = { path = "crates/paths" }
+theme = { path = "crates/theme" }
+ui = { path = "crates/ui" }
+util = { path = "crates/util" }
+window = { path = "crates/window" }
+workspace = { path = "crates/workspace" }
 
 # Feature crates
-keyway_agent = { path = "crates/agent" }
-keyway_calculator = { path = "crates/calculator" }
-keyway_clipboard = { path = "crates/clipboard" }
-keyway_devtools = { path = "crates/devtools" }
-keyway_emoji = { path = "crates/emoji" }
-keyway_file_search = { path = "crates/file-search" }
-keyway_notes = { path = "crates/notes" }
-keyway_screenshot = { path = "crates/screenshot" }
-keyway_settings = { path = "crates/settings" }
-keyway_store = { path = "crates/store" }
+agent = { path = "crates/agent" }
+calculator = { path = "crates/calculator" }
+clipboard = { path = "crates/clipboard" }
+devtools = { path = "crates/devtools" }
+emoji = { path = "crates/emoji" }
+file_search = { path = "crates/file-search" }
+notes = { path = "crates/notes" }
+screenshot = { path = "crates/screenshot" }
+settings = { path = "crates/settings" }
+store = { path = "crates/store" }
 
 #
 # External crates
