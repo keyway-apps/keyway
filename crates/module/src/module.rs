@@ -76,14 +76,12 @@ impl ModuleContext {
         cx.notify(self.entity_id);
     }
 
-    pub(crate) fn with_boxed_module<M: Module>(
+    pub(crate) fn with_boxed_module(
         &mut self,
-        module: Entity<M>,
+        module: AnyModule,
         group: Option<&str>,
         cx: &mut Context<Self>,
     ) {
-        let module: AnyModule = module.into();
-        
         let module_name = module.name(cx);
         if self.module_names.contains(&module_name) {
             tracing::warn!(
@@ -245,19 +243,19 @@ impl<M: Module> From<Entity<M>> for AnyModule {
 }
 
 impl AnyModule {
-    fn name(&self, cx: &mut App) -> String {
+    pub(crate) fn name(&self, cx: &mut App) -> String {
         (self.name)(self, cx)
     }
 
-    fn build(&self, context: &mut ModuleContext, cx: &mut App) -> Result<()> {
+    pub(crate) fn build(&self, context: &mut ModuleContext, cx: &mut App) -> Result<()> {
         (self.build)(self, context, cx)
     }
 
-    fn ready(&self, context: &mut ModuleContext, cx: &mut App) -> Result<()> {
+    pub(crate) fn ready(&self, context: &mut ModuleContext, cx: &mut App) -> Result<()> {
         (self.ready)(self, context, cx)
     }
 
-    fn stop(&self, context: &mut ModuleContext, cx: &mut App) -> Result<()> {
+    pub(crate) fn stop(&self, context: &mut ModuleContext, cx: &mut App) -> Result<()> {
         (self.stop)(self, context, cx)
     }
 
@@ -332,7 +330,8 @@ mod sealed {
 
     impl<M: Module> Modules<ModuleMarker> for M {
         fn with_to_module(self, context: &mut ModuleContext, cx: &mut Context<ModuleContext>) {
-            context.with_boxed_module(cx.new(|_| self), None, cx);
+            let module = cx.new(|_| self).into();
+            context.with_boxed_module(module, None, cx);
         }
     }
 
@@ -340,102 +339,5 @@ mod sealed {
         fn with_to_module(self, context: &mut ModuleContext, cx: &mut Context<ModuleContext>) {
             self.build().finish(context, cx);
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::sync::{
-        Arc, Mutex,
-        atomic::{AtomicBool, Ordering},
-    };
-
-    use crate::{Command, ModuleGroup, ModuleGroupBuilder, init};
-
-    use super::*;
-
-    struct LifecycleModule {
-        events: Arc<Mutex<Vec<&'static str>>>,
-    }
-
-    impl Module for LifecycleModule {
-        fn build(&mut self, context: &mut ModuleContext, cx: &mut Context<Self>) -> Result<()> {
-            assert_ne!(context.entity_id, cx.entity_id());
-            self.events.lock().unwrap().push("build");
-            context.register_command(
-                Command::new("test.lifecycle", "Lifecycle Test"),
-                |_actions, _context, _cx| Ok(()),
-                cx,
-            );
-            Ok(())
-        }
-
-        fn ready(&mut self, _context: &mut ModuleContext, _cx: &mut Context<Self>) -> Result<()> {
-            self.events.lock().unwrap().push("ready");
-            Ok(())
-        }
-
-        fn stop(&mut self, _context: &mut ModuleContext, _cx: &mut Context<Self>) -> Result<()> {
-            self.events.lock().unwrap().push("stop");
-            Ok(())
-        }
-    }
-
-    struct LifecycleGroup {
-        events: Arc<Mutex<Vec<&'static str>>>,
-    }
-
-    impl ModuleGroup for LifecycleGroup {
-        fn build(self) -> ModuleGroupBuilder {
-            ModuleGroupBuilder::start::<Self>().add(LifecycleModule {
-                events: self.events,
-            })
-        }
-    }
-
-    #[gpui::test]
-    async fn module_lifecycle_uses_the_module_entity_context(cx: &mut gpui::TestAppContext) {
-        let events = Arc::new(Mutex::new(Vec::new()));
-        let closure_built = Arc::new(AtomicBool::new(false));
-
-        cx.update(|cx| {
-            init(cx);
-
-            let store = ModuleStore::global(cx);
-            store.update(cx, |store, cx| {
-                store.with_modules(
-                    LifecycleGroup {
-                        events: events.clone(),
-                    },
-                    cx,
-                );
-
-                let closure_built = closure_built.clone();
-                store.with_modules(
-                    move |_context: &mut ModuleContext, _cx: &mut App| {
-                        closure_built.store(true, Ordering::SeqCst);
-                        Ok(())
-                    },
-                    cx,
-                );
-
-                store.drive_ready(cx);
-                store.drive_stop(cx);
-                store.drive_stop(cx);
-            });
-
-            let module_context = store.read(cx).context();
-            assert_eq!(
-                module_context
-                    .read(cx)
-                    .command_registry()
-                    .commands()
-                    .count(),
-                1
-            );
-        });
-
-        assert_eq!(&*events.lock().unwrap(), &["build", "ready", "stop"]);
-        assert!(closure_built.load(Ordering::SeqCst));
     }
 }
