@@ -243,19 +243,19 @@ impl<M: Module> From<Entity<M>> for AnyModule {
 }
 
 impl AnyModule {
-    pub(crate) fn name(&self, cx: &mut App) -> String {
+    pub fn name(&self, cx: &mut App) -> String {
         (self.name)(self, cx)
     }
 
-    pub(crate) fn build(&self, context: &mut ModuleContext, cx: &mut App) -> Result<()> {
+    pub fn build(&self, context: &mut ModuleContext, cx: &mut App) -> Result<()> {
         (self.build)(self, context, cx)
     }
 
-    pub(crate) fn ready(&self, context: &mut ModuleContext, cx: &mut App) -> Result<()> {
+    pub fn ready(&self, context: &mut ModuleContext, cx: &mut App) -> Result<()> {
         (self.ready)(self, context, cx)
     }
 
-    pub(crate) fn stop(&self, context: &mut ModuleContext, cx: &mut App) -> Result<()> {
+    pub fn stop(&self, context: &mut ModuleContext, cx: &mut App) -> Result<()> {
         (self.stop)(self, context, cx)
     }
 

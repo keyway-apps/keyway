@@ -10,6 +10,7 @@ mod view;
 pub use command::*;
 pub use module::*;
 pub use module_group::*;
+pub use view::*;
 
 pub mod prelude {
     pub use super::{
