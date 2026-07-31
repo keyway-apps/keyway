@@ -3,7 +3,7 @@ use gpui::{AppContext, Context};
 
 use util::TypeIdMap;
 
-use crate::{Module, ModuleContext, AnyModule};
+use crate::{AnyModule, Module, ModuleContext};
 
 pub trait ModuleGroup {
     fn build(self) -> ModuleGroupBuilder;
@@ -34,7 +34,12 @@ impl ModuleGroupBuilder {
         }
     }
 
-    fn upsert_module_state<T: Module>(&mut self, module: T, added_at_index: usize, cx: &mut Context<Self>) {
+    fn upsert_module_state<T: Module>(
+        &mut self,
+        module: T,
+        added_at_index: usize,
+        cx: &mut Context<Self>,
+    ) {
         let module = cx.new(|_| module).into();
         self.upsert_module_entry_state(
             TypeId::of::<T>(),
@@ -43,7 +48,7 @@ impl ModuleGroupBuilder {
                 enabled: true,
             },
             added_at_index,
-            cx
+            cx,
         );
     }
 
@@ -52,7 +57,7 @@ impl ModuleGroupBuilder {
         key: TypeId,
         module: ModuleEntry,
         added_at_index: usize,
-         cx: &mut Context<Self>
+        cx: &mut Context<Self>,
     ) {
         if let Some(entry) = self.modules.insert(key, module) {
             if entry.enabled {

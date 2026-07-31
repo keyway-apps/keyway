@@ -5,7 +5,7 @@ use std::panic::{AssertUnwindSafe, catch_unwind};
 
 use collections::HashSet;
 
-use crate::{CommandRegistry, GlobalModuleStore};
+use crate::{CommandRegistry, DynamicRegistry, GlobalModuleStore};
 
 pub struct ModuleStore {
     context: Entity<ModuleContext>,
@@ -60,6 +60,7 @@ pub struct ModuleContext {
     module_registry: Vec<ModuleSlot>,
     module_names: HashSet<String>,
     pub(crate) command_registry: CommandRegistry,
+    pub(crate) dynamic_registry: DynamicRegistry,
 }
 
 impl ModuleContext {
@@ -69,6 +70,7 @@ impl ModuleContext {
             module_registry: Default::default(),
             module_names: Default::default(),
             command_registry: Default::default(),
+            dynamic_registry: Default::default(),
         }
     }
 

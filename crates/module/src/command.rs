@@ -3,6 +3,7 @@ use std::rc::Rc;
 use collections::{HashMap, hash_map::Entry};
 use gpui::{App, Context};
 use serde::{Deserialize, Serialize};
+use ui::Icon;
 
 use crate::ModuleContext;
 
@@ -13,7 +14,7 @@ pub struct Command {
     pub subtitle: Option<String>,
     pub category: Option<String>,
     pub description: Option<String>,
-    pub icon: Option<String>,
+    pub icon: Icon,
     pub keywords: Option<Vec<String>>,
     pub match_regexes: Option<Vec<String>>,
     pub shortcut: Option<String>,
@@ -62,7 +63,7 @@ pub struct CommandBuilder {
     subtitle: Option<String>,
     category: Option<String>,
     description: Option<String>,
-    icon: Option<String>,
+    icon: Option<Icon>,
     keywords: Option<Vec<String>>,
     match_regexes: Option<Vec<String>>,
     shortcut: Option<String>,
@@ -102,8 +103,8 @@ impl CommandBuilder {
         self
     }
 
-    pub fn icon(mut self, icon: impl Into<String>) -> Self {
-        self.icon = Some(icon.into());
+    pub fn icon(mut self, icon: Icon) -> Self {
+        self.icon = Some(icon);
         self
     }
 
@@ -159,13 +160,14 @@ impl CommandBuilder {
     }
 
     pub fn build(self) -> Command {
+        let icon = self.icon.unwrap_or_else(|| default_icon(&self.title));
         Command {
             id: self.id,
             title: self.title,
             subtitle: self.subtitle,
             category: self.category,
             description: self.description,
-            icon: self.icon,
+            icon,
             keywords: self.keywords,
             match_regexes: self.match_regexes,
             shortcut: self.shortcut,
@@ -173,6 +175,10 @@ impl CommandBuilder {
             visible_by_default: self.visible_by_default,
         }
     }
+}
+
+fn default_icon(title: &str) -> Icon {
+    Icon::character(title.trim().chars().next().unwrap_or('?'))
 }
 
 pub trait CommandAction:
@@ -202,7 +208,7 @@ impl Actions {
 }
 
 #[derive(Default)]
-pub struct CommandRegistry {
+pub(crate) struct CommandRegistry {
     commands: HashMap<String, Command>,
     actions: HashMap<String, Rc<dyn CommandAction>>,
 }
@@ -277,8 +283,16 @@ impl CommandRegistry {
 }
 
 impl ModuleContext {
-    pub fn command_registry(&self) -> &CommandRegistry {
-        &self.command_registry
+    pub fn visible_commands(&self) -> impl Iterator<Item = &Command> {
+        self.command_registry.visible_commands()
+    }
+
+    pub fn enabled_commands(&self) -> impl Iterator<Item = &Command> {
+        self.command_registry.enabled_commands()
+    }
+
+    pub fn commands(&self) -> impl Iterator<Item = &Command> {
+        self.command_registry.commands()
     }
 
     pub fn register_command(&mut self, command: Command, action: impl CommandAction, cx: &mut App) {
@@ -323,6 +337,47 @@ mod tests {
 
     use super::*;
     use crate::{ModuleStore, init};
+    use ui::IconSource;
+
+    #[test]
+    fn derives_only_the_first_title_character() {
+        for (title, expected) in [
+            ("Quick Search", 'Q'),
+            ("  calculator", 'c'),
+            ("\u{5feb}\u{901f}\u{641c}\u{7d22}", '\u{5feb}'),
+            (
+                "\u{0411}\u{044b}\u{0441}\u{0442}\u{0440}\u{044b}\u{0439}",
+                '\u{0411}',
+            ),
+        ] {
+            assert!(matches!(
+                default_icon(title).source(),
+                IconSource::Character(character) if *character == expected
+            ));
+        }
+    }
+
+    #[test]
+    fn command_builds_a_default_icon_and_preserves_an_explicit_icon() {
+        let defaulted = Command::new("quick-search", "Quick Search");
+        assert!(matches!(
+            defaulted.icon.source(),
+            IconSource::Character('Q')
+        ));
+
+        let explicit = Command::builder("quick-search", "Quick Search")
+            .icon(Icon::path("icons/search.svg"))
+            .build();
+        assert!(matches!(
+            explicit.icon.source(),
+            IconSource::Path(path) if path == "icons/search.svg"
+        ));
+
+        assert!(matches!(
+            Command::new("untitled", "").icon.source(),
+            IconSource::Character('?')
+        ));
+    }
 
     #[gpui::test]
     async fn module_context_registers_and_executes_commands(cx: &mut gpui::TestAppContext) {
@@ -340,7 +395,7 @@ mod tests {
                     Command::new("test.command", "Test Command"),
                     move |actions, context, _cx| {
                         actions.set_query("executed");
-                        assert_eq!(context.command_registry().commands().count(), 1);
+                        assert_eq!(context.commands().count(), 1);
                         action_executed.set(true);
                         Ok(())
                     },
@@ -353,7 +408,7 @@ mod tests {
                     .unwrap();
 
                 assert_eq!(actions.query(), Some("executed"));
-                assert_eq!(context.command_registry().visible_commands().count(), 1);
+                assert_eq!(context.visible_commands().count(), 1);
             });
         });
 

@@ -1,21 +1,23 @@
 use gpui::{App, AppContext, Entity, Global};
 
 mod command;
-mod inline;
+mod dynamic;
 mod module;
 mod module_group;
 mod shortcut;
 mod view;
 
 pub use command::*;
+pub use dynamic::*;
 pub use module::*;
 pub use module_group::*;
+pub use ui::Icon;
 pub use view::*;
 
 pub mod prelude {
     pub use super::{
-        Actions, Command, CommandAction, CommandBuilder, CommandRegistry, Module, ModuleContext,
-        ModuleGroup, ModuleGroupBuilder, ModuleStore,
+        Actions, AnyDynamic, Command, CommandAction, CommandBuilder, DynamicRender, Icon, Module,
+        ModuleContext, ModuleGroup, ModuleGroupBuilder, ModuleStore,
     };
 }
 

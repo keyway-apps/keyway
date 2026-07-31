@@ -12,6 +12,10 @@ use crate::delegates::CommandListDelegate;
 use crate::state::ViewMode;
 
 mod delegates;
+mod dynamic;
+mod filter;
+mod render;
+mod section;
 mod state;
 
 pub static WIDTH: f32 = 750.0;
@@ -51,12 +55,13 @@ impl Workspace {
 
         let commands: Vec<Command> = module_context
             .read(cx)
-            .command_registry()
             .visible_commands()
             .cloned()
             .collect();
 
-        let delegate = CommandListDelegate::new(commands.clone());
+        let dynamics = module_context.read(cx).dynamics().cloned().collect();
+
+        let delegate = CommandListDelegate::new(commands.clone(), dynamics);
 
         let command_list_state = cx.new(|cx| ListState::new(delegate, window, cx));
 
@@ -64,12 +69,11 @@ impl Workspace {
         cx.observe(&module_context, move |_this, module_context, cx| {
             let commands = module_context
                 .read(cx)
-                .command_registry()
                 .visible_commands()
                 .cloned()
                 .collect::<Vec<_>>();
             list_for_context.update(cx, |list, cx| {
-                list.delegate_mut().replace_commands(commands);
+                list.delegate_mut().update(commands);
                 cx.notify();
             });
         })

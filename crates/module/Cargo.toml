@@ -8,10 +8,13 @@ license.workspace = true
 
 [dependencies]
 collections = { workspace = true }
+ui = { workspace = true }
 util = { workspace = true }
 
 anyhow = { workspace = true }
 gpui = { workspace = true }
+gpui-component = { workspace = true }
+regex = { workspace = true }
 serde = { workspace = true }
 tracing = { workspace = true }
 

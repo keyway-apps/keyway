@@ -32,9 +32,9 @@ impl CommandFilter {
         commands: impl IntoIterator<Item = &'a Command>,
         query: &str,
     ) -> Vec<FilteredCommand> {
-        let commands = commands.into_iter();
+        let items = commands.into_iter();
         if query.trim().is_empty() {
-            return commands
+            return items
                 .enumerate()
                 .map(|(index, _)| FilteredCommand { index, score: 0 })
                 .collect();
@@ -49,7 +49,7 @@ impl CommandFilter {
         );
 
         let mut buf = Vec::new();
-        let mut scored: Vec<FilteredCommand> = commands
+        let mut scored: Vec<FilteredCommand> = items
             .enumerate()
             .filter_map(|(index, command)| {
                 self.score_command(&pattern, command, &mut buf)

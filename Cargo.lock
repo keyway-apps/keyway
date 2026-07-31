@@ -3947,8 +3947,11 @@ dependencies = [
  "anyhow",
  "collections 0.1.0",
  "gpui",
+ "gpui-component",
+ "regex",
  "serde",
  "tracing",
+ "ui",
  "util",
 ]
 
@@ -7253,6 +7256,8 @@ version = "0.1.0"
 dependencies = [
  "gpui",
  "gpui-component",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

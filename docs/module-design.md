@@ -25,15 +25,22 @@ impl ViewRender for ClipboardView {
     }
 }
 
-pub struct ClipboardInline;
+pub struct ClipboardDynamic;
 
-impl InlineProvider for ClipboardInline {
-    fn score(&self, query: &str) -> Option<u16> {
+impl DynamicRender for ClipboardDynamic {
+    fn score(&self, query: &str, cx: &Context<Self>) -> Option<u16> {
         Some(1000)
     }
 
-    fn render(&self, cx: &Context<Self>) -> impl IntoElement {
+    fn render(&self,  window: &mut Window, cx: &Context<Self>) -> impl IntoElement {
         div()
+    }
+
+    fn activate(&self, context: &mut ModuleContext, cx: &mut Context<Self>) -> Result<()> {
+        mc.open_view(options, |window, cx| {
+            cx.new(|cx| ClipboardView::new(window, cx))
+        })
+        OK(())
     }
 }
 
@@ -70,13 +77,12 @@ impl Module for ClipboardModule {
             // 用户修改了快捷键
         })
 
-        let inline = cx.new(|cx| ClipboardInline::new(cx)); 
-        mc.register_inline(inline, |_, mc, cx| {
-            mc.open_view(options, |window, cx| {
-                cx.new(|cx| ClipboardView::new(window, cx))
-            })
+        let dynamic = DynamicBuilder::new("calculator", "Calculator")
+            .match_regexes()
+            .build();
 
-            Ok(())
+        mc.register_dynamic(dynamic, |context, cx| {
+            cx.new(|cx| ClipboardDynamic::new(cx))
         }, cx);
 
         Ok(())
