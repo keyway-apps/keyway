@@ -22,20 +22,20 @@ pub static WIDTH: f32 = 750.0;
 pub static HEIGHT: f32 = 475.0;
 
 pub fn init(cx: &mut App) {
-    let display_id = cx.displays().first().map(|d| d.id());
-
-    let mut options = WindowOptions::default();
-
-    options.focus = true;
+    let display_id = cx.primary_display().map(|display| display.id());
 
     let size = size(px(WIDTH), px(HEIGHT));
-    options.window_bounds = Some(WindowBounds::Windowed(Bounds::centered(
-        display_id, size, cx,
-    )));
-
-    options.titlebar = None;
-    options.is_movable = false;
-    options.kind = WindowKind::PopUp;
+    let options = WindowOptions {
+        focus: true,
+        window_bounds: Some(WindowBounds::Windowed(Bounds::centered(
+            display_id, size, cx,
+        ))),
+        titlebar: None,
+        is_movable: false,
+        kind: WindowKind::PopUp,
+        display_id,
+        ..Default::default()
+    };
 
     cx.open_window(options, |window, cx| {
         cx.new(|cx| Root::new(cx.new(|cx| Workspace::new(window, cx)), window, cx))
@@ -61,35 +61,59 @@ impl Workspace {
 
         let dynamics = module_context.read(cx).dynamics().cloned().collect();
 
-        let delegate = CommandListDelegate::new(commands.clone(), dynamics);
+        let delegate = CommandListDelegate::new(commands, dynamics);
 
         let command_list_state = cx.new(|cx| ListState::new(delegate, window, cx));
+        let initial_selection = command_list_state.read(cx).delegate().selected_index();
+        command_list_state.update(cx, |list, cx| {
+            list.set_selected_index(initial_selection, window, cx);
+        });
 
         let list_for_context = command_list_state.clone();
-        cx.observe(&module_context, move |_this, module_context, cx| {
-            let commands = module_context
-                .read(cx)
-                .visible_commands()
-                .cloned()
-                .collect::<Vec<_>>();
-            list_for_context.update(cx, |list, cx| {
-                list.delegate_mut().update(commands);
-                cx.notify();
-            });
-        })
+        cx.observe_in(
+            &module_context,
+            window,
+            move |_this, module_context, window, cx| {
+                let module_context = module_context.read(cx);
+                let commands = module_context
+                    .visible_commands()
+                    .cloned()
+                    .collect::<Vec<_>>();
+                let dynamics = module_context.dynamics().cloned().collect::<Vec<_>>();
+                list_for_context.update(cx, |list, cx| {
+                    let selected = {
+                        let delegate = list.delegate_mut();
+                        delegate.update(commands, dynamics, cx);
+                        delegate.selected_index()
+                    };
+                    list.set_selected_index(selected, window, cx);
+                    cx.notify();
+                });
+            },
+        )
         .detach();
 
         let input_state =
             cx.new(|cx| InputState::new(window, cx).placeholder("Search for apps and commands..."));
 
         let list_for_input = command_list_state.clone();
-        cx.subscribe(
+        cx.subscribe_in(
             &input_state,
-            move |_this, input: Entity<InputState>, event: &InputEvent, cx: &mut Context<Self>| {
+            window,
+            move |_this,
+                  input: &Entity<InputState>,
+                  event: &InputEvent,
+                  window,
+                  cx: &mut Context<Self>| {
                 if let InputEvent::Change = event {
                     let text = input.read(cx).value().to_string();
                     list_for_input.update(cx, |list, cx| {
-                        list.delegate_mut().set_query(text);
+                        let selected = {
+                            let delegate = list.delegate_mut();
+                            delegate.set_query(text, cx);
+                            delegate.selected_index()
+                        };
+                        list.set_selected_index(selected, window, cx);
                         cx.notify();
                     });
                 }

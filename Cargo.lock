@@ -2458,7 +2458,7 @@ dependencies = [
 [[package]]
 name = "gpui-component"
 version = "0.5.2"
-source = "git+https://github.com/longbridge/gpui-component#031555662e99a1b5a549990b47f246d475b8288a"
+source = "git+https://github.com/SpuerMomonga/gpui-component#1b6ee74a7ce21d57c40760bae376aee6f6d30fbc"
 dependencies = [
  "aho-corasick",
  "anyhow",
@@ -2506,7 +2506,7 @@ dependencies = [
 [[package]]
 name = "gpui-component-assets"
 version = "0.5.1"
-source = "git+https://github.com/longbridge/gpui-component#031555662e99a1b5a549990b47f246d475b8288a"
+source = "git+https://github.com/SpuerMomonga/gpui-component#1b6ee74a7ce21d57c40760bae376aee6f6d30fbc"
 dependencies = [
  "anyhow",
  "gpui",
@@ -2520,7 +2520,7 @@ dependencies = [
 [[package]]
 name = "gpui-component-macros"
 version = "0.5.1"
-source = "git+https://github.com/longbridge/gpui-component#031555662e99a1b5a549990b47f246d475b8288a"
+source = "git+https://github.com/SpuerMomonga/gpui-component#1b6ee74a7ce21d57c40760bae376aee6f6d30fbc"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -8498,6 +8498,7 @@ dependencies = [
  "gpui-component",
  "module",
  "nucleo",
+ "regex",
  "tracing",
  "ui",
 ]
