@@ -24,7 +24,7 @@ impl SectionType {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SectionItem {
     Dynamic,
-    Command { index: usize, regex_match: bool },
+    Command { index: usize },
 }
 
 #[derive(Clone, Debug, Default)]
@@ -92,34 +92,22 @@ impl SectionManager {
     pub fn item_at(&self, section: usize, row: usize) -> Option<SectionItem> {
         match self.section_type_at(section)? {
             SectionType::Dynamic => (row == 0).then_some(SectionItem::Dynamic),
-            SectionType::Suggestions => {
-                self.keyword_matches
-                    .get(row)
-                    .map(|item| SectionItem::Command {
-                        index: item.index,
-                        regex_match: false,
-                    })
-            }
+            SectionType::Suggestions => self
+                .keyword_matches
+                .get(row)
+                .map(|item| SectionItem::Command { index: item.index }),
             SectionType::BestMatch if !self.keyword_matches.is_empty() => self
                 .keyword_matches
                 .get(row)
-                .map(|item| SectionItem::Command {
-                    index: item.index,
-                    regex_match: false,
-                }),
-            SectionType::BestMatch => {
-                self.regex_matches
-                    .get(row)
-                    .copied()
-                    .map(|index| SectionItem::Command {
-                        index,
-                        regex_match: true,
-                    })
+                .map(|item| SectionItem::Command { index: item.index }),
+            SectionType::BestMatch => self
+                .regex_matches
+                .get(row)
+                .copied()
+                .map(|index| SectionItem::Command { index }),
+            SectionType::All => {
+                (row < self.all_count).then_some(SectionItem::Command { index: row })
             }
-            SectionType::All => (row < self.all_count).then_some(SectionItem::Command {
-                index: row,
-                regex_match: false,
-            }),
         }
     }
 
@@ -170,10 +158,7 @@ mod tests {
         assert_eq!(manager.items_count(0), 5);
         assert_eq!(
             manager.item_at(0, 4),
-            Some(SectionItem::Command {
-                index: 4,
-                regex_match: false
-            })
+            Some(SectionItem::Command { index: 4 })
         );
     }
 
@@ -185,10 +170,7 @@ mod tests {
         assert_eq!(manager.sections, [SectionType::BestMatch, SectionType::All]);
         assert_eq!(
             manager.item_at(0, 0),
-            Some(SectionItem::Command {
-                index: 2,
-                regex_match: false
-            })
+            Some(SectionItem::Command { index: 2 })
         );
     }
 
@@ -208,10 +190,7 @@ mod tests {
         assert_eq!(manager.item_at(0, 0), Some(SectionItem::Dynamic));
         assert_eq!(
             manager.item_at(1, 0),
-            Some(SectionItem::Command {
-                index: 1,
-                regex_match: true
-            })
+            Some(SectionItem::Command { index: 1 })
         );
     }
 

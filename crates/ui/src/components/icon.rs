@@ -1,8 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use gpui::{
-    AnyElement, App, Hsla, ImageSource, IntoElement, ParentElement, RenderOnce, SharedString,
-    StyleRefinement, Styled, Window, div, img, prelude::FluentBuilder as _,
+    AnyElement, App, Hsla, ImageSource, IntoElement, ParentElement, RenderOnce, SharedString, StyleRefinement, Styled, Window, div, img, prelude::FluentBuilder as _, rgba,
 };
 use gpui_component::{ActiveTheme, Icon as ComponentIcon, IconName, IconNamed as _, StyledExt};
 use serde::{Deserialize, Serialize};
@@ -247,13 +246,14 @@ impl RenderOnce for Icon {
         };
 
         div()
-            .size_8()
+            .size_5()
             .flex_none()
             .flex()
             .items_center()
             .justify_center()
             .overflow_hidden()
             .rounded_sm()
+            .bg(rgba(0xDC3432FF))
             .when_some(self.text_color, |this, color| {
                 this.text_color(color.resolve(is_dark))
             })

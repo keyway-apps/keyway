@@ -1,79 +1,73 @@
 use gpui::{
-    App, Div, ParentElement, SharedString, Styled, Window, div, prelude::FluentBuilder, px,
+    App, Div, IntoElement, ParentElement, RenderOnce, SharedString, Stateful, Styled, Window, div, hsla, prelude::FluentBuilder, px, rgba,
 };
-use gpui_component::{ActiveTheme, list::ListItem};
+use gpui_component::{ActiveTheme, Selectable, list::ListItem};
 use module::{AnyDynamic, Command};
 
-pub(crate) const COMMAND_ITEM_HEIGHT: f32 = 48.0;
+pub(crate) const COMMAND_ITEM_HEIGHT: f32 = 40.0;
 pub(crate) const DYNAMIC_ITEM_HEIGHT: f32 = 125.0;
 
-pub fn render_command_item(
-    id: u64,
-    command: &Command,
-    regex_query: Option<&str>,
-    selected: bool,
-    cx: &App,
-) -> ListItem {
-    let title: SharedString = regex_query
-        .map(|query| format!("Open \"{query}\" with {}", command.title))
-        .unwrap_or_else(|| command.title.clone())
-        .into();
-    let subtitle = command
-        .subtitle
-        .as_ref()
-        .or(command.description.as_ref())
-        .cloned();
+pub fn render_item(id: u64, command: &Command, selected: bool, window: &mut Window, cx: &mut App) -> ListItem {
+
+    let icon = command.icon.clone().render(window, cx).into_any_element();
 
     let mut content = div()
-        .min_w_0()
+        .w_full()
+        .h_full()
         .flex_1()
         .flex()
-        .flex_col()
+        .flex_row()
+        .items_center()
+        .gap_2()
         .overflow_hidden()
+        .child(icon)
         .child(
             div()
-                .w_full()
                 .whitespace_nowrap()
                 .overflow_hidden()
                 .text_ellipsis()
-                .child(title),
+                .child(SharedString::from(command.title.clone())),
         );
 
-    if let Some(subtitle) = subtitle {
+    if let Some(subtitle) = &command.subtitle {
         content = content.child(
             div()
-                .w_full()
+                .flex_1()
                 .text_sm()
                 .text_color(cx.theme().muted_foreground)
                 .whitespace_nowrap()
                 .overflow_hidden()
                 .text_ellipsis()
-                .child(subtitle),
+                .child(SharedString::from(subtitle.clone())),
         );
     }
 
+    let bg_color = if selected {
+        rgba(0xF5F5F5FF)
+    } else {
+        rgba(0x00000000)
+    };
+
     let row = div()
         .h(px(COMMAND_ITEM_HEIGHT))
-        .min_w_0()
+        .w_full()
+        .px_2p5()
+        .py_0()
+        .m_0()
         .flex()
+        .flex_row()
         .items_center()
-        .gap_3()
-        .child(command.icon.clone().background_color(cx.theme().secondary))
-        .child(content)
-        .when_some(command.shortcut.clone(), |this, shortcut| {
-            this.child(
-                div()
-                    .flex_none()
-                    .text_xs()
-                    .text_color(cx.theme().muted_foreground)
-                    .child(shortcut),
-            )
-        });
+        .justify_between()
+        .bg(bg_color)
+        .gap_2()
+        .rounded_sm()
+        .overflow_hidden()
+        .child(content);
 
     ListItem::new(("workspace-command-item", id))
-        .selected(selected)
-        .px_2()
-        .py_0()
+        .p_0()
+        .m_0()
+        .rounded(px(6.))
         .child(row)
 }
 

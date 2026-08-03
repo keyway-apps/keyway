@@ -9,7 +9,7 @@ use crate::{
     dynamic::DynamicItems,
     filter::CommandFilter,
     render::{
-        COMMAND_ITEM_HEIGHT, DYNAMIC_ITEM_HEIGHT, render_command_item, render_dynamic_item,
+        COMMAND_ITEM_HEIGHT, DYNAMIC_ITEM_HEIGHT, render_dynamic_item, render_item,
         render_section_header,
     },
     section::{SectionItem, SectionManager},
@@ -152,11 +152,9 @@ impl ListDelegate for CommandListDelegate {
                 .map(|dynamic| render_dynamic_item(id, dynamic, selected, window, cx)),
             SectionItem::Command {
                 index: command_index,
-                regex_match,
             } => {
                 let command = self.commands.get(command_index)?;
-                let regex_query = regex_match.then_some(self.query.trim());
-                Some(render_command_item(id, command, regex_query, selected, cx))
+                Some(render_item(id, command, selected, window, cx))
             }
         }
     }

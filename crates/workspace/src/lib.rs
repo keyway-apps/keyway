@@ -157,7 +157,6 @@ impl Render for Workspace {
                 div()
                     .w_full()
                     .px_2()
-                    .py_2()
                     .border_t_1()
                     .border_color(rgb(0xCCCCCC)),
             )
