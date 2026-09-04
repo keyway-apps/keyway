@@ -7,7 +7,6 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
-module = { workspace = true }
 ui = { workspace = true }
 
 gpui = { workspace = true }

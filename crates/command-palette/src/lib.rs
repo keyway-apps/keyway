@@ -1,4 +1,4 @@
-use gpui::{App, Context};
+use gpui::App;
 
 pub fn init(cx: &mut App) {
 

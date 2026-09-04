@@ -13,19 +13,15 @@ fn main() {
         return;
     }
 
-    let app = Application::with_platform(gpui_platform::current_platform(false));
+    Application::with_platform(gpui_platform::current_platform(false))
+        .with_assets(Assets)
+        .run(move |cx| {
+            i18n::init("en");
+            gpui_component::init(cx);
+            Theme::change(ThemeMode::Light, None, cx);
 
-    app.with_assets(Assets).run(move |cx| {
-        i18n::init("en");
-        gpui_component::init(cx);
-        Theme::change(ThemeMode::Light, None, cx);
+            gpui_tokio::init(cx);
 
-        gpui_tokio::init(cx);
-
-        module::init(cx);
-
-        clipboard::init(cx);
-
-        workspace::init(cx);
-    });
+            clipboard::init(cx);
+        });
 }

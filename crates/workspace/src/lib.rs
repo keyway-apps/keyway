@@ -1,138 +1,91 @@
+use std::sync::Arc;
+
+use anyhow::Ok;
+use collections::HashSet;
 use gpui::{
-    AnyElement, App, AppContext, Bounds, Context, Entity, IntoElement, Render, Window,
-    WindowBounds, WindowKind, WindowOptions, div, prelude::*, px, rgb, size,
+    App, AppContext, Bounds, Context, Entity, Global, IntoElement, Render, Task, WeakEntity, Window, WindowBounds,
+    WindowKind, WindowOptions, div, prelude::*, px, rgb, size,
 };
-use gpui_component::input::{InputEvent, InputState};
-use gpui_component::list::{List, ListState};
-use gpui_component::{Root, Sizable};
+use gpui_component::{Root, Sizable, input::InputState};
 
-use module::{Command, ModuleStore};
+pub struct AppState {
+    pub workspace_store: Entity<WorkspaceStore>,
+}
 
-use crate::delegates::CommandListDelegate;
-use crate::state::ViewMode;
+impl AppState {
+    pub fn global(cx: &App) -> Arc<Self> {
+        cx.global::<GlobalAppState>().0.clone()
+    }
 
-mod delegates;
-mod dynamic;
-mod filter;
-mod render;
-mod section;
-mod state;
+    pub fn try_global(cx: &App) -> Option<Arc<Self>> {
+        cx.try_global::<GlobalAppState>().map(|state| state.0.clone())
+    }
 
-pub static WIDTH: f32 = 750.0;
-pub static HEIGHT: f32 = 475.0;
+    pub fn set_global(state: Arc<AppState>, cx: &mut App) {
+        cx.set_global(GlobalAppState(state));
+    }
+}
 
-pub fn init(cx: &mut App) {
-    let display_id = cx.primary_display().map(|display| display.id());
+struct GlobalAppState(Arc<AppState>);
 
-    let size = size(px(WIDTH), px(HEIGHT));
-    let options = WindowOptions {
-        focus: true,
-        window_bounds: Some(WindowBounds::Windowed(Bounds::centered(
-            display_id, size, cx,
-        ))),
-        titlebar: None,
-        is_movable: false,
-        kind: WindowKind::PopUp,
-        display_id,
-        ..Default::default()
-    };
+impl Global for GlobalAppState {}
 
-    cx.open_window(options, |window, cx| {
-        cx.new(|cx| Root::new(cx.new(|cx| Workspace::new(window, cx)), window, cx))
-    })
-    .unwrap();
+pub struct WorkspaceStore {}
+
+impl WorkspaceStore {
+    pub fn new(cx: &mut App) -> Self {
+        Self {}
+    }
 }
 
 pub struct Workspace {
-    pub(crate) view_mode: ViewMode,
     pub(crate) input_state: Entity<InputState>,
-    pub(crate) command_list_state: Entity<ListState<CommandListDelegate>>,
 }
 
 impl Workspace {
-    pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
-        let module_context = ModuleStore::global(cx).read(cx).context();
+    pub fn new(app_state: Arc<AppState>, window: &mut Window, cx: &mut Context<Self>) -> Self {
+        let input_state = cx.new(|cx| InputState::new(window, cx).placeholder("Search for apps and commands..."));
 
-        let commands: Vec<Command> = module_context
-            .read(cx)
-            .visible_commands()
-            .cloned()
-            .collect();
+        let weak_handle = cx.entity().downgrade();
 
-        let dynamics = module_context.read(cx).dynamics().cloned().collect();
-
-        let delegate = CommandListDelegate::new(commands, dynamics);
-
-        let command_list_state = cx.new(|cx| ListState::new(delegate, window, cx));
-        let initial_selection = command_list_state.read(cx).delegate().selected_index();
-        command_list_state.update(cx, |list, cx| {
-            list.set_selected_index(initial_selection, window, cx);
+        let any_window_handle = window.window_handle();
+        app_state.workspace_store.update(cx, |store, _| {
+            store.workspaces.insert((any_window_handle, weak_handle.clone()))
         });
 
-        let list_for_context = command_list_state.clone();
-        cx.observe_in(
-            &module_context,
-            window,
-            move |_this, module_context, window, cx| {
-                let module_context = module_context.read(cx);
-                let commands = module_context
-                    .visible_commands()
-                    .cloned()
-                    .collect::<Vec<_>>();
-                let dynamics = module_context.dynamics().cloned().collect::<Vec<_>>();
-                list_for_context.update(cx, |list, cx| {
-                    let selected = {
-                        let delegate = list.delegate_mut();
-                        delegate.update(commands, dynamics, cx);
-                        delegate.selected_index()
-                    };
-                    list.set_selected_index(selected, window, cx);
-                    cx.notify();
-                });
-            },
-        )
-        .detach();
+        Self { input_state }
+    }
 
-        let input_state =
-            cx.new(|cx| InputState::new(window, cx).placeholder("Search for apps and commands..."));
+    pub fn new_local(app_state: Arc<AppState>, cx: &mut App) -> Task<anyhow::Result<()>> {
+        let display_id = cx.primary_display().map(|display| display.id());
+        let bounds = WindowBounds::Windowed(Bounds::centered(display_id, size(px(750.), px(475.)), cx));
 
-        let list_for_input = command_list_state.clone();
-        cx.subscribe_in(
-            &input_state,
-            window,
-            move |_this,
-                  input: &Entity<InputState>,
-                  event: &InputEvent,
-                  window,
-                  cx: &mut Context<Self>| {
-                if let InputEvent::Change = event {
-                    let text = input.read(cx).value().to_string();
-                    list_for_input.update(cx, |list, cx| {
-                        let selected = {
-                            let delegate = list.delegate_mut();
-                            delegate.set_query(text, cx);
-                            delegate.selected_index()
-                        };
-                        list.set_selected_index(selected, window, cx);
-                        cx.notify();
-                    });
+        cx.spawn(async move |cx| {
+            let options = WindowOptions {
+                focus: true,
+                window_bounds: Some(bounds),
+                titlebar: None,
+                is_movable: false,
+                kind: WindowKind::PopUp,
+                display_id,
+                ..Default::default()
+            };
+
+            cx.open_window(options, {
+                let app_state = app_state.clone();
+                move |window, cx| {
+                    let workspace = cx.new(|cx| Workspace::new(app_state, window, cx));
+                    cx.new(|cx| Root::new(workspace, window, cx))
                 }
-            },
-        )
-        .detach();
+            })?;
 
-        Self {
-            view_mode: Default::default(),
-            input_state,
-            command_list_state,
-        }
+            Ok(())
+        })
     }
 }
 
 impl Render for Workspace {
-    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        let content = self.render_content();
-
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div()
             .size_full()
             .flex()
@@ -142,40 +95,35 @@ impl Render for Workspace {
             .child(
                 div()
                     .w_full()
-                    .p_2()
+                    .h(56.)
+                    .flex()
+                    .items_center()
+                    .px_2()
                     .border_b_1()
                     .border_color(rgb(0xCCCCCC))
                     .child(
                         gpui_component::input::Input::new(&self.input_state)
                             .large()
                             .appearance(false)
-                            .cleanable(true),
+                            .cleanable(true)
+                            .flex_1(),
                     ),
             )
-            .child(div().flex_1().w_full().child(content))
+            // view
+            .child(div().id("workspace-content").flex_1().w_full())
             .child(
                 div()
                     .w_full()
+                    .flex()
+                    .flex_row()
+                    .justify_between()
                     .px_2()
                     .border_t_1()
-                    .border_color(rgb(0xCCCCCC)),
+                    .border_color(rgb(0xCCCCCC))
+                    // title
+                    .child(div())
+                    // actions button and action dropdown
+                    .child(div()),
             )
-    }
-}
-
-impl Workspace {
-    fn render_content(&mut self) -> AnyElement {
-        match self.view_mode {
-            // The intermediate container needs an explicit size. Without it,
-            // the List's `size_full` has no definite height to resolve against
-            // and the virtual list can render as a zero-height child.
-            ViewMode::Main => div()
-                .size_full()
-                .overflow_hidden()
-                .p_2()
-                .child(List::new(&self.command_list_state).size_full())
-                .into_any_element(),
-            ViewMode::View => div().child("view").into_any_element(),
-        }
     }
 }

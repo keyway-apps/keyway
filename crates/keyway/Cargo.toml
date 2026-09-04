@@ -20,7 +20,6 @@ assets = { workspace = true }
 i18n = { workspace = true }
 ipc = { workspace = true }
 ktracing = { workspace = true }
-module = { workspace = true }
 util = { workspace = true }
 workspace = { workspace = true }
 

@@ -2,9 +2,9 @@
 
 ## Overview
 
-Keyway is a Rust and GPUI desktop application workspace. The application package, `keyway`, provides the `keyway` executable and currently initializes logging, internationalization, the module system, and the GPUI application runtime.
+Keyway is a Rust and GPUI desktop application workspace. The application package, `keyway`, provides the `keyway` executable and initializes logging, internationalization, application services, and the GPUI runtime.
 
-The `crates` directory is split into foundation capabilities and feature modules. Foundation crates provide shared boundaries such as paths, logging, collection types, module and command domain types, and extensions. Feature crates implement concrete quick-launch capabilities such as calculator, clipboard, file search, screenshots, settings, and store functionality. Package names match their directories and do not use a product-specific prefix.
+The `crates` directory is split into foundation capabilities and feature modules. Foundation crates provide shared boundaries such as paths, logging, collection types, command infrastructure, and extensions. Feature crates implement concrete quick-launch capabilities such as calculator, clipboard, file search, screenshots, settings, and store functionality. Package names match their directories and do not use a product-specific prefix.
 
 ## Documentation Rule
 
@@ -14,7 +14,7 @@ When a package under `crates` is added, removed, renamed, or has its responsibil
 
 | Path | Package | Responsibility |
 | --- | --- | --- |
-| `crates/keyway/src/main.rs` | `keyway` | Single-file process entry point for the `keyway` executable; initializes GPUI and enabled modules. |
+| `crates/keyway/src/main.rs` | `keyway` | Single-file process entry point for the `keyway` executable; initializes GPUI and enabled crates. |
 
 ## Workspace Crates
 
@@ -25,21 +25,20 @@ When a package under `crates` is added, removed, renamed, or has its responsibil
 | `crates/assets` | `assets` | Embeds and exposes application assets to GPUI. |
 | `crates/cli` | `cli` | Auxiliary CLI package and future command-line tooling boundary. |
 | `crates/collections` | `collections` | Provides common collection aliases and re-exports, currently defaulting to `rustc_hash` `FxHashMap` and `FxHashSet`. |
+| `crates/command-palette` | `command_palette` | Default workspace item that collects, searches, filters, displays, and executes commands supplied by the command system. It does not own concrete command behavior. |
 | `crates/config` | `config` | Owns configuration structures, loading, validation, and persistence boundaries. |
 | `crates/db` | `db` | Persistence and database access layer boundary. |
 | `crates/extension` | `extension` | Extension system boundary, including extension manifests, loading, runtime contracts, and sandbox integration. |
 | `crates/i18n` | `i18n` | Internationalization entry point; wraps `rust-i18n` locale initialization and re-exports translation macros. |
 | `crates/ipc` | `ipc` | Owns the typed tarpc IPC protocol, local endpoint policy integration, daemon client helpers, and server transport adapters for daemon requests. |
 | `crates/ktracing` | `ktracing` | Logging and tracing initialization with environment filter support, stderr output, and file logging. |
-| `crates/module` | `module` | Owns module lifecycle and grouping; `ModuleContext` owns a scoped `CommandRegistry` for command models and actions. See [`docs/module-design.md`](./docs/module-design.md). |
 | `crates/net` | `net` | Keyway-owned local IPC transport shim; exposes UnixListener/UnixStream types backed by Unix domain sockets on Unix platforms and `uds_windows` on Windows. |
 | `crates/onboarding` | `onboarding` | First-run setup, permission guidance, and initialization experience. |
 | `crates/paths` | `paths` | Resolves cross-platform application, configuration, data, cache, log, and extension directories. |
 | `crates/theme` | `theme` | Application theme definitions and theme integration boundary. |
 | `crates/ui` | `ui` | Shared application UI components and presentation primitives. |
 | `crates/util` | `util` | Shared lightweight utility macros and helpers that do not belong to a more specific foundation crate. |
-| `crates/window` | `window` | Window lifecycle, window abstraction, OS window primitives, and UI shell boundary. |
-| `crates/workspace` | `workspace` | Main application workspace state, command palette/search, layout, and navigation boundary; it consumes but does not own the Command model. |
+| `crates/workspace` | `workspace` | Main application workspace state, Item contract, Window lifecycle, Pane layout, focus, navigation, and opening already-created Item entities. It does not own command semantics. |
 
 ### Feature Crates
 
