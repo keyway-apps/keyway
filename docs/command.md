@@ -6,8 +6,8 @@ pub init(cx: &mut App) {
     let command = Command::new("clipboard.open.view", "Clipboard");
     CommandRegister::register(command, |ctx: Context, cx: &mut App| {
 
-        // 在现有窗口添加
-        workspace::with_id_or_primary_workspace(ctx.workspace_id, cx, |workspace, cx| {
+        // 在现有窗口添加 使用 scoped-tls 来确定调用窗口
+        workspace::with_active_or_primary_workspace(cx, |workspace, window, cx| {
             let item = cx.new(|_| ClipboardItem::new());
             // 在主窗口打开
             workspace.open_item(item, cx);
@@ -20,8 +20,12 @@ pub init(cx: &mut App) {
             })
         });
 
+        workspace::with_primary_workspace(cx, |workspace, window, cx| {
+            //
+        })
+
         // 使用单独的窗口
-        workspace::open_workspace(open_options, cx, |workspace, cx| {
+        workspace::with_new_workspace(open_options, cx, |workspace, cx| {
             let item = cx.new(|_| ClipboardItem::new());
             // 在主窗口打开
             workspace.open_item(item, cx);

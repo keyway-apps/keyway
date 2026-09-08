@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use anyhow::Ok;
 use collections::HashSet;
@@ -30,13 +30,17 @@ struct GlobalAppState(Arc<AppState>);
 
 impl Global for GlobalAppState {}
 
-pub struct WorkspaceStore {}
+pub struct WorkspaceStore {
+    workspaces: HashMap<WorkspaceId, (gpui::AnyWindowHandle, WeakEntity<Workspace>)>,
+}
 
 impl WorkspaceStore {
     pub fn new(cx: &mut App) -> Self {
-        Self {}
+        Self { workspaces: Default::default() }
     }
 }
+
+pub struct WorkspaceId(i64);
 
 pub struct Workspace {
     pub(crate) input_state: Entity<InputState>,

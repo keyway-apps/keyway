@@ -22,6 +22,9 @@ fn main() {
 
             gpui_tokio::init(cx);
 
+            command::init(cx);
+
+            command_palette::init(cx);
             clipboard::init(cx);
         });
 }

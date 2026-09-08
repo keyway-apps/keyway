@@ -1168,6 +1168,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d07550c9036bf2ae0c684c4297d503f838287c83c53686d05370d0e139ae570"
 
 [[package]]
+name = "command"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "gpui",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "command_palette"
 version = "0.1.0"
 dependencies = [
@@ -3616,6 +3626,8 @@ dependencies = [
  "assets",
  "clap",
  "clipboard",
+ "command",
+ "command_palette",
  "gpui",
  "gpui-component",
  "gpui_platform",
@@ -8701,6 +8713,7 @@ checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 name = "workspace"
 version = "0.1.0"
 dependencies = [
+ "collections 0.1.0",
  "gpui",
  "gpui-component",
  "nucleo",

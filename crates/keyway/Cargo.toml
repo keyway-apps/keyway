@@ -16,22 +16,24 @@ path = "src/main.rs"
 # Workspace member crates
 #
 
-assets = { workspace = true }
-i18n = { workspace = true }
-ipc = { workspace = true }
-ktracing = { workspace = true }
-util = { workspace = true }
-workspace = { workspace = true }
+assets.workspace = true
+command.workspace = true
+command_palette.workspace = true
+i18n.workspace = true
+ipc.workspace = true
+ktracing.workspace = true
+util.workspace = true
+workspace.workspace = true
 
-clipboard = { workspace = true }
+clipboard.workspace = true
 
 #
 # External crates
 #
 
-anyhow = { workspace = true }
+anyhow.workspace = true
 clap = { workspace = true, features = ["derive"] }
-gpui = { workspace = true }
-gpui-component = { workspace = true }
-gpui_platform = { workspace = true }
-gpui_tokio = { workspace = true }
+gpui.workspace = true
+gpui-component.workspace = true
+gpui_platform.workspace = true
+gpui_tokio.workspace = true
