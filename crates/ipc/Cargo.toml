@@ -12,8 +12,6 @@ paths = { workspace = true }
 
 anyhow = { workspace = true }
 futures = "0.3"
-gpui = { workspace = true }
-gpui_tokio = { workspace = true }
 tokio = { workspace = true }
 tarpc = { workspace = true }
 tokio-serde = { workspace = true }

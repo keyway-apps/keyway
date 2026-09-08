@@ -1,9 +1,9 @@
 use std::path::{Path, PathBuf};
 
-use gpui::{
+use gpui_kit::{
     AnyElement, App, Hsla, ImageSource, IntoElement, ParentElement, RenderOnce, SharedString, StyleRefinement, Styled, Window, div, img, prelude::FluentBuilder as _, rgba,
 };
-use gpui_component::{ActiveTheme, Icon as ComponentIcon, IconName, IconNamed as _, StyledExt};
+use gpui_kit::component::{ActiveTheme, Icon as ComponentIcon, IconName, IconNamed as _, StyledExt};
 use serde::{Deserialize, Serialize};
 
 /// A color that can adapt to the active light or dark theme.
@@ -51,7 +51,7 @@ pub enum IconSource {
     Character(char),
     /// An embedded asset path, URL, or absolute file-system path.
     Path(String),
-    /// The asset name of an icon supplied by `gpui_component`.
+    /// The asset name of an icon supplied by `gpui-kit`.
     #[serde(rename = "builtin")]
     BuiltIn(String),
 }
@@ -152,7 +152,7 @@ fn text_content(text: impl Into<SharedString>) -> AnyElement {
         .into_any_element()
 }
 
-/// A command-oriented icon that renders text, images, or `gpui_component` icons.
+/// A command-oriented icon that renders text, images, or `gpui-kit` icons.
 ///
 /// String values containing exactly one Unicode scalar value render as a character. Other string
 /// values are treated as embedded asset paths or URLs, which makes `Command::icon` values directly
@@ -291,7 +291,7 @@ mod tests {
     }
 
     #[test]
-    fn accepts_gpui_component_icons() {
+    fn accepts_gpui_kit_icons() {
         assert!(matches!(
             IconSource::from(IconName::Search),
             IconSource::BuiltIn(name) if name == "search"
@@ -316,10 +316,10 @@ mod tests {
 
     #[test]
     fn serializes_character_and_theme_colors() {
-        let light_text = gpui::rgb(0x111111).into();
-        let dark_text = gpui::rgb(0xeeeeee).into();
-        let light_background = gpui::rgb(0xffffff).into();
-        let dark_background = gpui::rgb(0x222222).into();
+        let light_text = gpui_kit::rgb(0x111111).into();
+        let dark_text = gpui_kit::rgb(0xeeeeee).into();
+        let light_background = gpui_kit::rgb(0xffffff).into();
+        let dark_background = gpui_kit::rgb(0x222222).into();
         let icon = Icon::character('K')
             .text_colors(light_text, dark_text)
             .background_colors(light_background, dark_background);
@@ -358,8 +358,8 @@ mod tests {
 
     #[test]
     fn resolves_theme_colors() {
-        let light = gpui::rgb(0xffffff).into();
-        let dark = gpui::rgb(0x111111).into();
+        let light = gpui_kit::rgb(0xffffff).into();
+        let dark = gpui_kit::rgb(0x111111).into();
         let colors = IconColor::new(light, dark);
 
         assert_eq!(colors.resolve(false), light);

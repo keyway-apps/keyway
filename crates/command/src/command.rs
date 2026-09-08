@@ -1,4 +1,4 @@
-use gpui::{App, AppContext as _, Entity, EventEmitter, Global};
+use gpui_kit::{App, AppContext as _, Entity, EventEmitter, Global};
 use serde::{Deserialize, Serialize};
 
 pub fn init(cx: &mut App) {

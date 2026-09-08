@@ -11,11 +11,11 @@ path = "src/workspace.rs"
 doctest = false
 
 [dependencies]
+anyhow.workspace = true
 collections.workspace = true
 ui.workspace = true
 
-gpui.workspace = true
-gpui-component.workspace = true
+gpui-kit.workspace = true
 nucleo.workspace = true
 regex.workspace = true
 tracing.workspace = true

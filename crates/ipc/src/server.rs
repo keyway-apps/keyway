@@ -1,7 +1,5 @@
 use anyhow::Result;
 use futures::prelude::*;
-use gpui::App;
-use gpui_tokio::Tokio;
 use net::async_net::UnixListener;
 use std::{path::PathBuf, sync::mpsc};
 use tarpc::context::Context;
@@ -69,52 +67,53 @@ pub fn prepare_socket() -> anyhow::Result<PathBuf> {
     Ok(socket_path)
 }
 
-pub fn start_server(cx: &App) -> anyhow::Result<IpcServerHandle> {
+pub fn start_server() -> anyhow::Result<IpcServerHandle> {
     let socket_path = get_socket_path();
     let socket_path_clone = socket_path.clone();
 
     let (bind_tx, bind_rx) = mpsc::channel::<Result<(), std::io::Error>>();
 
-    Tokio::spawn(cx, async move {
-        let listener = match UnixListener::bind(&socket_path_clone) {
-            Ok(listener) => {
-                let _ = bind_tx.send(Ok(()));
-                listener
-            }
-            Err(e) => {
-                let _ = bind_tx.send(Err(e));
-                return;
-            }
-        };
-
-        tracing::info!("IPC server listening on {:?}", socket_path_clone);
-
-        loop {
-            let (stream, _) = match listener.accept().await {
-                Ok((stream, addr)) => (stream, addr),
+    std::thread::spawn(move || {
+        let runtime = tokio::runtime::Builder::new_multi_thread()
+            .enable_all()
+            .build()
+            .expect("failed to initialize IPC Tokio runtime");
+        runtime.block_on(async move {
+            let listener = match UnixListener::bind(&socket_path_clone) {
+                Ok(listener) => {
+                    let _ = bind_tx.send(Ok(()));
+                    listener
+                }
                 Err(e) => {
-                    tracing::warn!("Failed to accept IPC connection: {}", e);
-                    continue;
+                    let _ = bind_tx.send(Err(e));
+                    return;
                 }
             };
 
-            let framed = tokio_util::codec::Framed::new(stream, LengthDelimitedCodec::new());
-            let transport = tarpc::serde_transport::new(framed, Json::default());
+            tracing::info!("IPC server listening on {:?}", socket_path_clone);
 
-            let server = KeywayServer::new();
+            loop {
+                let (stream, _) = match listener.accept().await {
+                    Ok((stream, addr)) => (stream, addr),
+                    Err(e) => {
+                        tracing::warn!("Failed to accept IPC connection: {}", e);
+                        continue;
+                    }
+                };
 
-            let channel = BaseChannel::with_defaults(transport);
+                let framed = tokio_util::codec::Framed::new(stream, LengthDelimitedCodec::new());
+                let transport = tarpc::serde_transport::new(framed, Json::default());
 
-            tokio::spawn(
-                channel
-                    .execute(server.serve())
-                    .for_each(|response| async move {
-                        tokio::spawn(response);
-                    }),
-            );
-        }
-    })
-    .detach();
+                let server = KeywayServer::new();
+
+                let channel = BaseChannel::with_defaults(transport);
+
+                tokio::spawn(channel.execute(server.serve()).for_each(|response| async move {
+                    tokio::spawn(response);
+                }));
+            }
+        });
+    });
 
     match bind_rx.recv() {
         Ok(Ok(())) => Ok(IpcServerHandle { socket_path }),

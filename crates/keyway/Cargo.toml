@@ -33,7 +33,4 @@ clipboard.workspace = true
 
 anyhow.workspace = true
 clap = { workspace = true, features = ["derive"] }
-gpui.workspace = true
-gpui-component.workspace = true
-gpui_platform.workspace = true
-gpui_tokio.workspace = true
+gpui-kit.workspace = true

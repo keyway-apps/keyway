@@ -1,6 +1,5 @@
-use gpui::Application;
-use gpui_component::theme::{Theme, ThemeMode};
-use gpui_platform;
+use gpui_kit::component::theme::{Theme, ThemeMode};
+use gpui_kit::{Application, platform};
 
 use assets::Assets;
 use ipc::server::prepare_socket;
@@ -13,14 +12,12 @@ fn main() {
         return;
     }
 
-    Application::with_platform(gpui_platform::current_platform(false))
+    Application::with_platform(platform::current_platform(false))
         .with_assets(Assets)
         .run(move |cx| {
             i18n::init("en");
-            gpui_component::init(cx);
+            gpui_kit::init(cx);
             Theme::change(ThemeMode::Light, None, cx);
-
-            gpui_tokio::init(cx);
 
             command::init(cx);
 

@@ -1,12 +1,14 @@
 use std::{collections::HashMap, sync::Arc};
 
-use anyhow::Ok;
-use collections::HashSet;
-use gpui::{
+use gpui_kit::{
     App, AppContext, Bounds, Context, Entity, Global, IntoElement, Render, Task, WeakEntity, Window, WindowBounds,
     WindowKind, WindowOptions, div, prelude::*, px, rgb, size,
 };
-use gpui_component::{Root, Sizable, input::InputState};
+use gpui_kit::component::{Root, Sizable, input::InputState};
+
+mod item;
+
+pub use item::*;
 
 pub struct AppState {
     pub workspace_store: Entity<WorkspaceStore>,
@@ -31,15 +33,17 @@ struct GlobalAppState(Arc<AppState>);
 impl Global for GlobalAppState {}
 
 pub struct WorkspaceStore {
-    workspaces: HashMap<WorkspaceId, (gpui::AnyWindowHandle, WeakEntity<Workspace>)>,
+    workspaces: HashMap<WorkspaceId, (gpui_kit::AnyWindowHandle, WeakEntity<Workspace>)>,
+    next_id: i64,
 }
 
 impl WorkspaceStore {
     pub fn new(cx: &mut App) -> Self {
-        Self { workspaces: Default::default() }
+        Self { workspaces: Default::default(), next_id: 0 }
     }
 }
 
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct WorkspaceId(i64);
 
 pub struct Workspace {
@@ -54,7 +58,9 @@ impl Workspace {
 
         let any_window_handle = window.window_handle();
         app_state.workspace_store.update(cx, |store, _| {
-            store.workspaces.insert((any_window_handle, weak_handle.clone()))
+            let id = WorkspaceId(store.next_id);
+            store.next_id += 1;
+            store.workspaces.insert(id, (any_window_handle, weak_handle.clone()));
         });
 
         Self { input_state }
@@ -99,14 +105,14 @@ impl Render for Workspace {
             .child(
                 div()
                     .w_full()
-                    .h(56.)
+                    .h(px(56.))
                     .flex()
                     .items_center()
                     .px_2()
                     .border_b_1()
                     .border_color(rgb(0xCCCCCC))
                     .child(
-                        gpui_component::input::Input::new(&self.input_state)
+                        gpui_kit::component::input::Input::new(&self.input_state)
                             .large()
                             .appearance(false)
                             .cleanable(true)

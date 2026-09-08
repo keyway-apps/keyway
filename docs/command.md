@@ -25,7 +25,7 @@ pub init(cx: &mut App) {
         })
 
         // 使用单独的窗口
-        workspace::with_new_workspace(open_options, cx, |workspace, cx| {
+        workspace::with_new_workspace(cx, |workspace, cx| {
             let item = cx.new(|_| ClipboardItem::new());
             // 在主窗口打开
             workspace.open_item(item, cx);
