@@ -1,0 +1,21 @@
+[package]
+name = "tray"
+
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+path = "src/tray.rs"
+doctest = false
+
+[dependencies]
+i18n.workspace = true
+workspace.workspace = true
+
+anyhow.workspace = true
+gpui-kit.workspace = true
+gpui-tray.workspace = true
+rust-i18n.workspace = true
+tracing.workspace = true

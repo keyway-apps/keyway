@@ -15,9 +15,11 @@ fn main() {
     Application::with_platform(platform::current_platform(false))
         .with_assets(Assets)
         .run(move |cx| {
-            i18n::init("en");
+            i18n::init();
             gpui_kit::init(cx);
             Theme::change(ThemeMode::Light, None, cx);
+
+            tray::init(cx);
 
             command::init(cx);
 

@@ -1,0 +1,7 @@
+tray:
+  open: 打开Keyway
+  documentation: 使用文档
+  about: 关于Keyway
+  check_updates: 检查更新
+  settings: 设置
+  quit: 退出

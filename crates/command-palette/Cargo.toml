@@ -6,5 +6,9 @@ edition.workspace = true
 authors.workspace = true
 license.workspace = true
 
+[lib]
+path = "src/command_palette.rs"
+doctest = false
+
 [dependencies]
 gpui-kit.workspace = true

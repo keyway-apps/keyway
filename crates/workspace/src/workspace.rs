@@ -137,3 +137,7 @@ impl Render for Workspace {
             )
     }
 }
+
+pub fn show_main_window(_cx: &mut App) {
+
+}

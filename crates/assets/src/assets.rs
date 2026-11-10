@@ -1,6 +1,8 @@
 use gpui_kit::{AssetSource, Result, SharedString};
 use rust_embed::RustEmbed;
 
+gpui_kit::assets::icon_assets!(ExtraIcons, [Calculator, WholeWord, Regex]);
+
 #[derive(RustEmbed)]
 #[folder = "../../assets"]
 #[include = "fonts/**/*"]
@@ -20,13 +22,22 @@ impl AssetSource for Assets {
             return Ok(Some(file.data));
         }
 
+        if let Some(icon) = ExtraIcons.load(path)? {
+            return Ok(Some(icon));
+        }
+
         gpui_kit::assets::Assets.load(path)
     }
 
     fn list(&self, path: &str) -> Result<Vec<SharedString>> {
         let mut result: Vec<SharedString> = Self::iter()
-            .filter_map(|p| p.starts_with(path).then(|| SharedString::from(p.to_string())))
+            .filter_map(|p| {
+                p.starts_with(path)
+                    .then(|| SharedString::from(p.to_string()))
+            })
             .collect();
+
+        result.extend(ExtraIcons.list(path)?);
 
         if let Ok(component_assets) = gpui_kit::assets::Assets.list(path) {
             result.extend(component_assets);

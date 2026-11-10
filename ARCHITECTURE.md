@@ -36,6 +36,7 @@ When a package under `crates` is added, removed, renamed, or has its responsibil
 | `crates/onboarding` | `onboarding` | First-run setup, permission guidance, and initialization experience. |
 | `crates/paths` | `paths` | Resolves cross-platform application, configuration, data, cache, log, and extension directories. |
 | `crates/theme` | `theme` | Application theme definitions and theme integration boundary. |
+| `crates/tray` | `tray` | Owns the system tray lifecycle, localized tray menu, and routing tray interactions to application actions. |
 | `crates/ui` | `ui` | Shared application UI components and presentation primitives. |
 | `crates/util` | `util` | Shared lightweight utility macros and helpers that do not belong to a more specific foundation crate. |
 | `crates/workspace` | `workspace` | Main application workspace state, Item contract, Window lifecycle, Pane layout, focus, navigation, and opening already-created Item entities. It does not own command semantics. |

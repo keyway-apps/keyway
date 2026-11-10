@@ -6,5 +6,9 @@ edition.workspace = true
 authors.workspace = true
 license.workspace = true
 
+[lib]
+path = "src/collections.rs"
+doctest = false
+
 [dependencies]
 rustc-hash = { workspace = true }

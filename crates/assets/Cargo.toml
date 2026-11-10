@@ -6,6 +6,10 @@ edition.workspace = true
 authors.workspace = true
 license.workspace = true
 
+[lib]
+path = "src/assets.rs"
+doctest = false
+
 [dependencies]
 anyhow = { workspace = true }
 gpui-kit.workspace = true
