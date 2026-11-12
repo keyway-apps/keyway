@@ -8,3 +8,8 @@ license.workspace = true
 
 [dependencies]
 collections = { workspace = true }
+gpui-kit.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+raw-window-handle.workspace = true
+windows-sys = { workspace = true, features = ["Win32_UI_WindowsAndMessaging"] }

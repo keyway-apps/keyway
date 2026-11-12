@@ -3,8 +3,8 @@ use std::{env, error::Error, io::IsTerminal, path::PathBuf};
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
 pub use tracing::{
-    Level, Span, debug, debug_span, error, error_span, event, field, info, info_span, instrument,
-    span, trace, trace_span, warn, warn_span,
+    Level, Span, debug, debug_span, error, error_span, event, field, info, info_span, instrument, span, trace,
+    trace_span, warn, warn_span,
 };
 
 pub const ENV_FILTER_VAR: &str = "KEYWAY_LOG";
@@ -47,11 +47,7 @@ pub fn init_test() {
 pub fn try_init(options: InitOptions) -> InitResult<()> {
     let filter = env_filter(options.filter.as_deref());
 
-    let file_layer = if options.log_to_file {
-        Some(file_layer()?)
-    } else {
-        None
-    };
+    let file_layer = if options.log_to_file { Some(file_layer()?) } else { None };
 
     let stderr_layer = options.log_to_stderr.then(|| {
         tracing_subscriber::fmt::layer()
@@ -59,8 +55,6 @@ pub fn try_init(options: InitOptions) -> InitResult<()> {
             .with_ansi(true)
             .with_writer(std::io::stderr)
     });
-
-    let _ = tracing_log::LogTracer::init();
 
     tracing_subscriber::registry()
         .with(filter)
@@ -93,9 +87,7 @@ where
     let logs_dir = log_file
         .parent()
         .expect("log file path should include a parent directory");
-    let log_file_name = log_file
-        .file_name()
-        .expect("log file path should include a file name");
+    let log_file_name = log_file.file_name().expect("log file path should include a file name");
     std::fs::create_dir_all(logs_dir)?;
 
     let file_appender = tracing_appender::rolling::never(logs_dir, PathBuf::from(log_file_name));
@@ -106,4 +98,21 @@ where
         .with_file(true)
         .with_line_number(true)
         .with_writer(file_appender))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn initializes_logging_once() {
+        let options = InitOptions {
+            filter: Some(DEFAULT_FILTER.to_owned()),
+            log_to_file: false,
+            log_to_stderr: false,
+        };
+
+        try_init(options.clone()).expect("first logging initialization should succeed");
+        assert!(try_init(options).is_err(), "duplicate initialization should fail");
+    }
 }

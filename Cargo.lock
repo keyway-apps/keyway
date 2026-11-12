@@ -83,6 +83,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "action_bar"
+version = "0.1.0"
+dependencies = [
+ "gpui-kit",
+ "i18n",
+ "rust-i18n",
+ "workspace",
+]
+
+[[package]]
 name = "addr2line"
 version = "0.27.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3569,6 +3579,7 @@ dependencies = [
  "i18n",
  "ipc",
  "ktracing",
+ "title_bar",
  "tray",
  "util",
  "workspace",
@@ -3618,7 +3629,6 @@ dependencies = [
  "paths",
  "tracing",
  "tracing-appender",
- "tracing-log",
  "tracing-subscriber",
 ]
 
@@ -6813,6 +6823,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd3ca314f692efd6c868f8408f53fe444634a845f96c028b97d35f6a1f79f0ee"
 
 [[package]]
+name = "title_bar"
+version = "0.1.0"
+dependencies = [
+ "gpui-kit",
+ "i18n",
+ "rust-i18n",
+ "workspace",
+]
+
+[[package]]
 name = "tokio"
 version = "1.54.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7341,6 +7361,9 @@ name = "util"
 version = "0.1.0"
 dependencies = [
  "collections",
+ "gpui-kit",
+ "raw-window-handle",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -8503,6 +8526,7 @@ dependencies = [
  "regex",
  "tracing",
  "ui",
+ "util",
 ]
 
 [[package]]

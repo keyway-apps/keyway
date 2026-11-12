@@ -7,3 +7,5 @@ pub type HashSet<T> = FxHashSet<T>;
 pub use rustc_hash::FxHasher;
 pub use rustc_hash::{FxHashMap, FxHashSet};
 pub use std::collections::*;
+
+pub mod pinnedset;

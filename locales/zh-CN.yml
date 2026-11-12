@@ -1,0 +1,12 @@
+title_bar:
+  match_case: 区分大小写
+  match_whole_word: 全字匹配
+  use_regex: 使用正则表达式
+  search_placeholder: 搜索应用和命令...
+tray:
+  open: 打开Keyway
+  documentation: 使用文档
+  about: 关于Keyway
+  check_updates: 检查更新
+  settings: 设置
+  quit: 退出

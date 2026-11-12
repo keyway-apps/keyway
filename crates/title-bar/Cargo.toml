@@ -1,0 +1,27 @@
+[package]
+name = "title_bar"
+
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+path = "src/title_bar.rs"
+doctest = false
+
+[dependencies]
+
+#
+# Workspace member crates
+#
+
+i18n.workspace = true
+workspace.workspace = true
+
+#
+# External crates
+#
+
+gpui-kit.workspace = true
+rust-i18n.workspace = true

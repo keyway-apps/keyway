@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     # Foundation crates
+    "crates/actions-bar",
     "crates/assets",
     "crates/cli",
     "crates/collections",
@@ -17,6 +18,7 @@ members = [
     "crates/onboarding",
     "crates/paths",
     "crates/theme",
+    "crates/title-bar",
     "crates/ktracing",
     "crates/tray",
     "crates/ui",
@@ -50,6 +52,7 @@ license = "AGPL-3.0"
 #
 
 # Foundation crates
+action_bar = { path = "crates/actions-bar" }
 assets = { path = "crates/assets" }
 collections = { path = "crates/collections" }
 command = { path = "crates/command" }
@@ -63,6 +66,7 @@ ktracing = { path = "crates/ktracing" }
 net = { path = "crates/net" }
 paths = { path = "crates/paths" }
 theme = { path = "crates/theme" }
+title_bar = { path = "crates/title-bar" }
 tray = { path = "crates/tray" }
 ui = { path = "crates/ui" }
 util = { path = "crates/util" }
@@ -98,6 +102,7 @@ rust-embed = { version = "8.11", features = ["include-exclude"] }
 rust-i18n = "4.2"
 rustc-hash = "2.1.3"
 regex = "1.12"
+raw-window-handle = "0.6"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 slotmap = "1.1.1"
@@ -109,7 +114,7 @@ tokio-util = { version = "0.7", features = ["codec"] }
 toml = "0.9"
 tracing = "0.1"
 tracing-appender = "0.2"
-tracing-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 uds_windows = "1.2"
 uuid = { version = "1.26.1", features = ["v4", "v5", "v7", "serde"] }
+windows-sys = "0.61"

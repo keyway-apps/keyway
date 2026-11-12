@@ -15,6 +15,7 @@ doctest = false
 collections.workspace = true
 i18n.workspace = true
 ui.workspace = true
+util.workspace = true
 
 anyhow.workspace = true
 gpui-kit.workspace = true
