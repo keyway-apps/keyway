@@ -22,7 +22,6 @@ command_palette.workspace = true
 i18n.workspace = true
 ipc.workspace = true
 ktracing.workspace = true
-title_bar.workspace = true
 tray.workspace = true
 util.workspace = true
 workspace.workspace = true

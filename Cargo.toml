@@ -2,7 +2,6 @@
 resolver = "3"
 members = [
     # Foundation crates
-    "crates/actions-bar",
     "crates/assets",
     "crates/cli",
     "crates/collections",
@@ -18,7 +17,6 @@ members = [
     "crates/onboarding",
     "crates/paths",
     "crates/theme",
-    "crates/title-bar",
     "crates/ktracing",
     "crates/tray",
     "crates/ui",
@@ -52,7 +50,6 @@ license = "AGPL-3.0"
 #
 
 # Foundation crates
-action_bar = { path = "crates/actions-bar" }
 assets = { path = "crates/assets" }
 collections = { path = "crates/collections" }
 command = { path = "crates/command" }
@@ -66,7 +63,6 @@ ktracing = { path = "crates/ktracing" }
 net = { path = "crates/net" }
 paths = { path = "crates/paths" }
 theme = { path = "crates/theme" }
-title_bar = { path = "crates/title-bar" }
 tray = { path = "crates/tray" }
 ui = { path = "crates/ui" }
 util = { path = "crates/util" }

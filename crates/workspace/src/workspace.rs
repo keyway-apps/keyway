@@ -7,12 +7,17 @@ use gpui_kit::{
     Subscription, Task, WeakEntity, Window, WindowHandle, WindowOptions, div,
 };
 
+use crate::item::ItemHandle;
 use crate::pane::Pane;
+use crate::status_bar::StatusBar;
+use crate::title_bar::TitleBar;
 
 pub mod actions;
 pub mod item;
 pub mod pane;
 pub mod searchable;
+pub mod status_bar;
+pub mod title_bar;
 
 pub struct AppState {
     pub workspace_store: Entity<WorkspaceStore>,
@@ -53,8 +58,8 @@ pub struct WorkspaceId(i64);
 
 pub struct Workspace {
     weak_self: WeakEntity<Self>,
-    titlebar_item: Option<AnyView>,
-    actionsbar_item: Option<AnyView>,
+    title_bar: Entity<TitleBar>,
+    status_bar: Entity<StatusBar>,
     center: Entity<Pane>,
     app_state: Arc<AppState>,
     _subscriptions: Vec<Subscription>,
@@ -64,7 +69,10 @@ impl Workspace {
     pub fn new(app_state: Arc<AppState>, window: &mut Window, cx: &mut Context<Self>) -> Self {
         let weak_handle = cx.entity().downgrade();
 
-        let center = cx.new(Pane::new);
+        let center = cx.new(|cx| Pane::new(weak_handle.clone(), cx));
+
+        let title_bar = cx.new(|cx| TitleBar::new(weak_handle.clone(), window, cx));
+        let status_bar = cx.new(|cx| StatusBar::new(weak_handle.clone(), window, cx));
 
         let window_handle = window.window_handle();
         app_state.workspace_store.update(cx, |store, _| {
@@ -92,8 +100,8 @@ impl Workspace {
 
         Self {
             weak_self: weak_handle.clone(),
-            titlebar_item: None,
-            actionsbar_item: None,
+            title_bar,
+            status_bar,
             center,
             app_state,
             _subscriptions: subscriptions,
@@ -122,24 +130,6 @@ impl Workspace {
         self.weak_self.clone()
     }
 
-    pub fn set_titlebar_item(&mut self, item: AnyView, cx: &mut Context<Self>) {
-        self.titlebar_item = Some(item);
-        cx.notify();
-    }
-
-    pub fn set_actionsbar_item(&mut self, item: AnyView, cx: &mut Context<Self>) {
-        self.actionsbar_item = Some(item);
-        cx.notify();
-    }
-
-    pub fn titlebar_item(&self) -> Option<AnyView> {
-        self.titlebar_item.clone()
-    }
-
-    pub fn actionsbar_item(&self) -> Option<AnyView> {
-        self.actionsbar_item.clone()
-    }
-
     pub fn for_window(window: &Window, cx: &App) -> Option<Entity<Workspace>> {
         window
             .root::<Root>()
@@ -165,6 +155,16 @@ impl Workspace {
             store.workspaces.set_pinned(Some((window_handle, self.weak_handle())));
         });
     }
+
+    pub fn add_item(
+        &mut self,
+        item: Box<dyn ItemHandle>,
+        focus: bool,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> bool {
+        true
+    }
 }
 
 impl Render for Workspace {
@@ -176,9 +176,9 @@ impl Render for Workspace {
             .flex_col()
             .gap_0()
             .overflow_hidden()
-            .children(self.titlebar_item.clone())
+            .child(self.title_bar.clone())
             .child(div().flex_1().min_h_0().child(self.center.clone()))
-            .children(self.actionsbar_item.clone())
+            .child(self.status_bar.clone())
     }
 }
 
