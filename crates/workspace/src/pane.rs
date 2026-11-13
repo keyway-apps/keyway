@@ -175,7 +175,7 @@ impl Pane {
         let active_item = self.active_item(cx);
 
         window.defer(cx, move |window, cx| {
-            let Ok(title_bar) = workspace.read_with(cx, |workspace, _| workspace.title_bar.clone()) else {
+            let Ok(Some(title_bar)) = workspace.read_with(cx, |workspace, _| workspace.title_bar.clone()) else {
                 return;
             };
 
@@ -190,7 +190,7 @@ impl Pane {
         let active_item = self.active_item(cx);
 
         window.defer(cx, move |window, cx| {
-            let Ok(status_bar) = workspace.read_with(cx, |workspace, _| workspace.status_bar.clone()) else {
+            let Ok(Some(status_bar)) = workspace.read_with(cx, |workspace, _| workspace.status_bar.clone()) else {
                 return;
             };
 

@@ -1,6 +1,10 @@
 use std::any::TypeId;
 
-use gpui_kit::{AnyEntity, AnyView, App, Context, Entity, EntityId, EventEmitter, FocusHandle, Focusable, Render};
+use gpui_kit::{
+    AnyEntity, AnyView, App, Context, Entity, EntityId, EventEmitter, FocusHandle, Focusable, Render, WeakEntity,
+};
+
+use crate::searchable::SearchableItemHandle;
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub enum ItemEvent {
@@ -20,7 +24,17 @@ pub trait Item: Focusable + EventEmitter<Self::Event> + Render + Sized {
         }
     }
 
+    fn as_searchable(&self, _: &Entity<Self>, _: &App) -> Option<Box<dyn SearchableItemHandle>> {
+        None
+    }
+
     fn on_removed(&mut self, cx: &mut Context<Self>);
+}
+
+pub trait WeakItemHandle: Send + Sync {
+    fn id(&self) -> EntityId;
+    fn boxed_clone(&self) -> Box<dyn WeakItemHandle>;
+    fn upgrade(&self) -> Option<Box<dyn ItemHandle>>;
 }
 
 pub trait ItemHandle: 'static + Send {
@@ -29,6 +43,7 @@ pub trait ItemHandle: 'static + Send {
     fn item_id(&self) -> EntityId;
     fn to_any_view(&self) -> AnyView;
     fn act_as_type(&self, type_id: TypeId, cx: &App) -> Option<AnyEntity>;
+    fn to_searchable_item_handle(&self, cx: &App) -> Option<Box<dyn SearchableItemHandle>>;
     fn on_removed(&mut self, cx: &mut App);
 }
 
@@ -63,6 +78,10 @@ impl<T: Item> ItemHandle for Entity<T> {
         self.read(cx).act_as_type(type_id, self, cx)
     }
 
+    fn to_searchable_item_handle(&self, cx: &App) -> Option<Box<dyn SearchableItemHandle>> {
+        self.read(cx).as_searchable(self, cx)
+    }
+
     fn on_removed(&mut self, cx: &mut App) {
         self.update(cx, |item, cx| item.on_removed(cx));
     }
@@ -71,5 +90,19 @@ impl<T: Item> ItemHandle for Entity<T> {
 impl Clone for Box<dyn ItemHandle> {
     fn clone(&self) -> Box<dyn ItemHandle> {
         self.boxed_clone()
+    }
+}
+
+impl<T: Item> WeakItemHandle for WeakEntity<T> {
+    fn id(&self) -> EntityId {
+        self.entity_id()
+    }
+
+    fn boxed_clone(&self) -> Box<dyn WeakItemHandle> {
+        Box::new(self.clone())
+    }
+
+    fn upgrade(&self) -> Option<Box<dyn ItemHandle>> {
+        self.upgrade().map(|v| Box::new(v) as Box<dyn ItemHandle>)
     }
 }

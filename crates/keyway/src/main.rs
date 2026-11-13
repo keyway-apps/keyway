@@ -32,6 +32,7 @@ fn main() {
             AppState::set_global(app_state.clone(), cx);
             command::init(cx);
 
+            search::init(cx);
             command_palette::init(cx);
 
             create_workspace(app_state, cx);

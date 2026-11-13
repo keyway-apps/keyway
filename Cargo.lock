@@ -3570,6 +3570,7 @@ dependencies = [
  "i18n",
  "ipc",
  "ktracing",
+ "search",
  "tray",
  "util",
  "workspace",
@@ -5962,6 +5963,9 @@ name = "search"
 version = "0.1.0"
 dependencies = [
  "gpui-kit",
+ "i18n",
+ "rust-i18n",
+ "workspace",
 ]
 
 [[package]]

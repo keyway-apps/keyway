@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use collections::pinnedset::PinnedSet;
 use gpui_kit::component::Root;
+use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::{
     AnyWindowHandle, App, AppContext, Context, Entity, Global, IntoElement, ParentElement, Render, Styled,
     Subscription, Task, WeakEntity, Window, WindowHandle, WindowOptions, div,
@@ -59,8 +60,8 @@ pub struct WorkspaceId(i64);
 
 pub struct Workspace {
     weak_self: WeakEntity<Self>,
-    title_bar: Entity<TitleBar>,
-    status_bar: Entity<StatusBar>,
+    title_bar: Option<Entity<TitleBar>>,
+    status_bar: Option<Entity<StatusBar>>,
     center: Entity<Pane>,
     app_state: Arc<AppState>,
     _subscriptions: Vec<Subscription>,
@@ -101,8 +102,8 @@ impl Workspace {
 
         Self {
             weak_self: weak_handle.clone(),
-            title_bar,
-            status_bar,
+            title_bar: Some(title_bar),
+            status_bar: Some(status_bar),
             center,
             app_state,
             _subscriptions: subscriptions,
@@ -125,6 +126,14 @@ impl Workspace {
 
             Ok(window)
         })
+    }
+
+    pub fn title_bar(&self) -> Option<Entity<TitleBar>> {
+        self.title_bar.clone()
+    }
+
+    pub fn status_bar(&self) -> Option<Entity<StatusBar>> {
+        self.status_bar.clone()
     }
 
     pub fn weak_handle(&self) -> WeakEntity<Self> {
@@ -200,9 +209,9 @@ impl Render for Workspace {
             .flex_col()
             .gap_0()
             .overflow_hidden()
-            .child(self.title_bar.clone())
+            .when_some(self.title_bar.clone(), |view, bar| view.child(bar))
             .child(div().flex_1().min_h_0().child(self.center.clone()))
-            .child(self.status_bar.clone())
+            .when_some(self.status_bar.clone(), |view, bar| view.child(bar))
     }
 }
 

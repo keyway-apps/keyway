@@ -1,5 +1,5 @@
-title_bar:
-  search_placeholder: Search for apps and commands...
+search_bar:
+  placeholder: Search for apps and commands...
   match_case: Match case
   match_whole_word: Match whole word
   use_regex: Use regular expression

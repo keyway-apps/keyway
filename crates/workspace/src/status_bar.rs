@@ -2,6 +2,10 @@ use gpui_kit::{Context, IntoElement, Render, Styled, WeakEntity, Window, div, px
 
 use crate::{Workspace, item::ItemHandle};
 
+pub trait StatusItemView: Render {
+    fn set_active_item(&mut self, active_item: Option<&dyn ItemHandle>, window: &mut Window, cx: &mut Context<Self>);
+}
+
 pub struct StatusBar {
     workspace: WeakEntity<Workspace>,
     active_item: Option<Box<dyn ItemHandle>>,

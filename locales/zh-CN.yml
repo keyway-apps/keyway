@@ -1,8 +1,8 @@
-title_bar:
+search_bar:
+  placeholder: 搜索应用和命令...
   match_case: 区分大小写
   match_whole_word: 全字匹配
   use_regex: 使用正则表达式
-  search_placeholder: 搜索应用和命令...
 tray:
   open: 打开Keyway
   documentation: 使用文档
