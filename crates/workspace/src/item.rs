@@ -1,11 +1,13 @@
 use std::any::TypeId;
 
-use gpui_kit::{
-    AnyEntity, AnyView, App, Context, Entity, EntityId, EventEmitter, FocusHandle, Focusable, Render, Subscription,
-    Window,
-};
+use gpui_kit::{AnyEntity, AnyView, App, Context, Entity, EntityId, EventEmitter, FocusHandle, Focusable, Render};
 
-use crate::Workspace;
+#[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
+pub enum ItemEvent {
+    CloseItem,
+    DetachItem,
+    LayoutChanged,
+}
 
 pub trait Item: Focusable + EventEmitter<Self::Event> + Render + Sized {
     type Event;
@@ -17,6 +19,8 @@ pub trait Item: Focusable + EventEmitter<Self::Event> + Render + Sized {
             None
         }
     }
+
+    fn on_removed(&mut self, cx: &mut Context<Self>);
 }
 
 pub trait ItemHandle: 'static + Send {
@@ -25,6 +29,7 @@ pub trait ItemHandle: 'static + Send {
     fn item_id(&self) -> EntityId;
     fn to_any_view(&self) -> AnyView;
     fn act_as_type(&self, type_id: TypeId, cx: &App) -> Option<AnyEntity>;
+    fn on_removed(&mut self, cx: &mut App);
 }
 
 impl dyn ItemHandle {
@@ -56,6 +61,10 @@ impl<T: Item> ItemHandle for Entity<T> {
 
     fn act_as_type<'a>(&'a self, type_id: TypeId, cx: &'a App) -> Option<AnyEntity> {
         self.read(cx).act_as_type(type_id, self, cx)
+    }
+
+    fn on_removed(&mut self, cx: &mut App) {
+        self.update(cx, |item, cx| item.on_removed(cx));
     }
 }
 

@@ -3,9 +3,10 @@ use std::sync::Arc;
 use collections::pinnedset::PinnedSet;
 use gpui_kit::component::Root;
 use gpui_kit::{
-    AnyView, AnyWindowHandle, App, AppContext, Context, Entity, Global, IntoElement, ParentElement, Render, Styled,
+    AnyWindowHandle, App, AppContext, Context, Entity, Global, IntoElement, ParentElement, Render, Styled,
     Subscription, Task, WeakEntity, Window, WindowHandle, WindowOptions, div,
 };
+use ui::NavMotion;
 
 use crate::item::ItemHandle;
 use crate::pane::Pane;
@@ -156,14 +157,37 @@ impl Workspace {
         });
     }
 
+    pub fn active_pane(&self) -> &Entity<Pane> {
+        &self.center
+    }
+
     pub fn add_item(
         &mut self,
         item: Box<dyn ItemHandle>,
-        focus: bool,
+        activate: bool,
+        focus_item: bool,
         window: &mut Window,
         cx: &mut Context<Self>,
-    ) -> bool {
-        true
+    ) {
+        self.center
+            .update(cx, |pane, cx| pane.add_item(item, activate, focus_item, window, cx))
+    }
+
+    /// Returns to the previous Item without adding a forward-history entry.
+    /// Keeps Items cached for reuse and retains the root page.
+    pub fn go_back(&mut self, window: &mut Window, cx: &mut Context<Self>) -> bool {
+        self.center.update(cx, |pane, cx| {
+            let popped = pane
+                .stack()
+                .update(cx, |stack, cx| stack.pop_without_history(NavMotion::Animated, cx));
+            if popped.is_none() {
+                return false;
+            }
+            pane.update_title_bar(window, cx);
+            pane.update_status_bar(window, cx);
+            pane.focus_active_item(window, cx);
+            true
+        })
     }
 }
 

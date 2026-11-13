@@ -16,6 +16,7 @@ members = [
     "crates/net",
     "crates/onboarding",
     "crates/paths",
+    "crates/search",
     "crates/theme",
     "crates/ktracing",
     "crates/tray",
@@ -62,6 +63,7 @@ ipc = { path = "crates/ipc" }
 ktracing = { path = "crates/ktracing" }
 net = { path = "crates/net" }
 paths = { path = "crates/paths" }
+search = { path = "crates/search" }
 theme = { path = "crates/theme" }
 tray = { path = "crates/tray" }
 ui = { path = "crates/ui" }

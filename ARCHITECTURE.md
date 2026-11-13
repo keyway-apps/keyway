@@ -22,7 +22,6 @@ When a package under `crates` is added, removed, renamed, or has its responsibil
 
 | Path | Package | Responsibility |
 | --- | --- | --- |
-| `crates/actions-bar` | `action_bar` | Workspace footer that presents contextual actions. |
 | `crates/assets` | `assets` | Embeds and exposes application assets to GPUI. |
 | `crates/cli` | `cli` | Auxiliary CLI package and future command-line tooling boundary. |
 | `crates/collections` | `collections` | Provides common collection aliases and re-exports, currently defaulting to `rustc_hash` `FxHashMap` and `FxHashSet`. |
@@ -38,11 +37,10 @@ When a package under `crates` is added, removed, renamed, or has its responsibil
 | `crates/onboarding` | `onboarding` | First-run setup, permission guidance, and initialization experience. |
 | `crates/paths` | `paths` | Resolves cross-platform application, configuration, data, cache, log, and extension directories. |
 | `crates/theme` | `theme` | Application theme definitions and theme integration boundary. |
-| `crates/title-bar` | `title_bar` | Workspace title bar and search input presentation. |
 | `crates/tray` | `tray` | Owns the system tray lifecycle, localized tray menu, and routing tray interactions to application actions. |
-| `crates/ui` | `ui` | Shared application UI components and presentation primitives. |
+| `crates/ui` | `ui` | Shared application UI components and presentation primitives, including a local GPUI Nav Stack adaptation with destructive pop and in-place history removal. |
 | `crates/util` | `util` | Shared utility macros and helpers, including GPUI window hiding and Windows native visibility operations. It does not own workspace selection or lifecycle. |
-| `crates/workspace` | `workspace` | Main application workspace state, Item contract, Window lifecycle, Pane layout, focus, navigation, and opening already-created Item entities. It does not own command semantics. |
+| `crates/workspace` | `workspace` | Main application workspace state, Item contract and on_removed lifecycle, Window lifecycle, Pane layout and focus, Item reuse cache and eviction, Item navigation through ui's NavStackState, title/status bar presentation, and opening already-created Item entities. It does not own command semantics. |
 
 ### Feature Crates
 

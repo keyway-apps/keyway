@@ -1,39 +1,22 @@
-use std::{
-    num::NonZeroUsize,
-    sync::{
-        Arc,
-        atomic::{AtomicUsize, Ordering},
-    },
-    time::Duration,
-};
+use std::{num::NonZeroUsize, time::Duration};
 
 use gpui_kit::{
     App, AppContext, Context, Entity, EntityId, FocusHandle, Focusable, IntoElement, ParentElement, Render, Styled,
     WeakEntity, Window,
-    base::{NavMotion, NavOperation, NavStack, NavStackState, PresencePhase, Transition},
+    base::{PresencePhase, Transition},
     component::empty::{Empty, EmptyHeader, EmptyTitle},
     div,
     prelude::FluentBuilder,
     relative,
 };
+use ui::{NavMotion, NavOperation, NavStack, NavStackState};
 
 use crate::{Workspace, item::ItemHandle};
 
-/// An item activation recorded in a pane's navigation history.
-pub struct ActivationHistoryEntry {
-    pub entity_id: EntityId,
-    /// A monotonically increasing activation sequence number within the pane.
-    pub timestamp: usize,
-}
-
 pub struct Pane {
-    // Oldest opened items come first; activation does not change this order.
+    // Cache only: oldest opened items come first; navigation does not reorder them.
     items: Vec<Box<dyn ItemHandle>>,
     focus_handle: FocusHandle,
-    active_item_index: usize,
-    // Activation order is independent of the cache's opening order.
-    activation_history: Vec<ActivationHistoryEntry>,
-    next_activation_timestamp: Arc<AtomicUsize>,
     pub(crate) workspace: WeakEntity<Workspace>,
     // Includes the active item; None leaves the cache unbounded.
     max_items: Option<NonZeroUsize>,
@@ -48,17 +31,14 @@ impl Pane {
         Self {
             items: Vec::new(),
             stack,
-            active_item_index: 0,
-            activation_history: Vec::new(),
-            next_activation_timestamp: Arc::new(AtomicUsize::new(0)),
             workspace,
             max_items: NonZeroUsize::new(10),
             focus_handle: cx.focus_handle(),
         }
     }
 
-    pub fn active_item_index(&self) -> usize {
-        self.active_item_index
+    pub(crate) fn stack(&self) -> &Entity<NavStackState> {
+        &self.stack
     }
 
     /// Reuses existing items and evicts the oldest inactive items when the cache is full.
@@ -66,8 +46,8 @@ impl Pane {
     pub fn add_item(
         &mut self,
         item: Box<dyn ItemHandle>,
-        focus_item: bool,
         activate: bool,
+        focus_item: bool,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
@@ -85,11 +65,10 @@ impl Pane {
             cx.notify();
 
             if activate {
-                self.active_item_index += 1;
-                self.activate_item(self.active_item_index, focus_item, window, cx);
+                self.activate_item(self.items.len() - 1, focus_item, window, cx);
             }
 
-            self.close_items_on_item_open();
+            self.close_items_on_item_open(window, cx);
         }
     }
 
@@ -101,48 +80,60 @@ impl Pane {
         self.items.iter()
     }
 
-    pub fn active_item(&self) -> Option<Box<dyn ItemHandle>> {
-        self.items.get(self.active_item_index).cloned()
+    pub fn active_item(&self, cx: &App) -> Option<Box<dyn ItemHandle>> {
+        let item_id = self.stack.read(cx).current()?.entity_id();
+        self.items.iter().find(|item| item.item_id() == item_id).cloned()
     }
 
-    /// Deactivates the current item and focuses the previously activated item.
-    /// Keeps both items cached and does nothing at the first activation.
-    pub fn close_item(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        let Some(previous_activation_index) = self.activation_history.len().checked_sub(2) else {
+    /// Removes an item from the cache and the stack's back/forward entries.
+    /// Removing the current page reveals the page beneath, or leaves the stack empty.
+    /// An empty pane remains open and receives focus if the removed item had it.
+    pub fn remove_item(&mut self, item_id: EntityId, focus_item: bool, window: &mut Window, cx: &mut Context<Self>) {
+        let Some(item_index) = self.items.iter().position(|item| item.item_id() == item_id) else {
             return;
         };
-        let previous_item_id = self.activation_history[previous_activation_index].entity_id;
-        let Some(previous_item_index) = self.items.iter().position(|item| item.item_id() == previous_item_id) else {
-            return;
-        };
+        let was_active = self
+            .stack
+            .read(cx)
+            .current()
+            .is_some_and(|view| view.entity_id() == item_id);
+        let should_focus = focus_item
+            || self.items[item_index]
+                .item_focus_handle(cx)
+                .contains_focused(window, cx);
+        let mut item = self.items.remove(item_index);
+        self.stack.update(cx, |stack, cx| stack.remove(item_id, cx));
+        item.on_removed(cx);
 
-        self.activation_history.pop();
-        self.activate_item(previous_item_index, true, window, cx);
+        if was_active {
+            self.update_title_bar(window, cx);
+            self.update_status_bar(window, cx);
+        }
+        if should_focus {
+            self.focus_active_item(window, cx);
+        }
+        cx.notify();
     }
 
-    pub fn activate_item(&mut self, index: usize, focus_item: bool, window: &mut Window, cx: &mut Context<Self>) {
-        if index < self.items.len() {
-            self.active_item_index = index;
-            let item_id = self.items[index].item_id();
-            if self
-                .activation_history
-                .last()
-                .is_none_or(|entry| entry.entity_id != item_id)
-            {
-                self.activation_history.push(ActivationHistoryEntry {
-                    entity_id: item_id,
-                    timestamp: self.next_activation_timestamp.fetch_add(1, Ordering::Relaxed),
-                });
-            }
-            let view = self.items[index].to_any_view();
+    /// Pushes a cached item's entity onto the navigation stack.
+    pub fn push(&mut self, index: usize, cx: &mut Context<Self>) {
+        if let Some(item) = self.items.get(index) {
+            let view = item.to_any_view();
             self.stack.update(cx, |stack, cx| {
                 if stack
                     .current()
                     .is_none_or(|current| current.entity_id() != view.entity_id())
                 {
-                    stack.replace(view, NavMotion::Animated, cx);
+                    stack.push(view, NavMotion::Animated, cx);
                 }
             });
+        }
+    }
+
+    pub fn activate_item(&mut self, index: usize, focus_item: bool, window: &mut Window, cx: &mut Context<Self>) {
+        if index < self.items.len() {
+            self.push(index, cx);
+
             self.update_title_bar(window, cx);
             self.update_status_bar(window, cx);
 
@@ -154,48 +145,34 @@ impl Pane {
         }
     }
 
-    fn close_items_on_item_open(&mut self) {
+    fn close_items_on_item_open(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let Some(max_items) = self.max_items else {
             return;
         };
 
         while self.items.len() > max_items.get() {
-            // Items are ordered oldest first; skip the first item only when it is active.
-            let oldest_inactive_index = if self.active_item_index == 0 { 1 } else { 0 };
-            let removed_item = self.items.remove(oldest_inactive_index);
-
-            if oldest_inactive_index < self.active_item_index {
-                self.active_item_index -= 1;
-            }
-
-            self.remove_item_from_activation_history(removed_item.item_id());
+            let active_id = self.stack.read(cx).current().map(|view| view.entity_id());
+            let oldest_inactive = self
+                .items
+                .iter()
+                .find(|item| Some(item.item_id()) != active_id)
+                .unwrap();
+            self.remove_item(oldest_inactive.item_id(), false, window, cx);
         }
-    }
-
-    fn remove_item_from_activation_history(&mut self, item_id: EntityId) {
-        self.activation_history.retain(|entry| entry.entity_id != item_id);
-
-        // Removing B from A -> B -> A leaves adjacent A entries; keep the newer activation.
-        self.activation_history.dedup_by(|later, earlier| {
-            if later.entity_id != earlier.entity_id {
-                return false;
-            }
-
-            earlier.timestamp = later.timestamp;
-            true
-        });
     }
 
     pub fn focus_active_item(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        if let Some(active_item) = self.active_item() {
+        if let Some(active_item) = self.active_item(cx) {
             let focus_handle = active_item.item_focus_handle(cx);
             window.focus(&focus_handle, cx);
+        } else {
+            self.focus_handle.focus(window, cx);
         }
     }
 
-    fn update_title_bar(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+    pub(crate) fn update_title_bar(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let workspace = self.workspace.clone();
-        let active_item = self.items.get(self.active_item_index).map(|item| item.boxed_clone());
+        let active_item = self.active_item(cx);
 
         window.defer(cx, move |window, cx| {
             let Ok(title_bar) = workspace.read_with(cx, |workspace, _| workspace.title_bar.clone()) else {
@@ -210,7 +187,7 @@ impl Pane {
 
     pub fn update_status_bar(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let workspace = self.workspace.clone();
-        let active_item = self.items.get(self.active_item_index).map(|item| item.boxed_clone());
+        let active_item = self.active_item(cx);
 
         window.defer(cx, move |window, cx| {
             let Ok(status_bar) = workspace.read_with(cx, |workspace, _| workspace.status_bar.clone()) else {
@@ -231,9 +208,9 @@ impl Focusable for Pane {
 }
 
 impl Render for Pane {
-    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div().size_full().when_else(
-            self.items.is_empty(),
+            self.stack.read(cx).is_empty(),
             |pane| {
                 pane.child(
                     Empty::new()

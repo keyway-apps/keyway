@@ -11,4 +11,6 @@ path = "src/command_palette.rs"
 doctest = false
 
 [dependencies]
+workspace.workspace = true
+
 gpui-kit.workspace = true
