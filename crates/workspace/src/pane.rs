@@ -2,7 +2,7 @@ use std::{num::NonZeroUsize, time::Duration};
 
 use gpui_kit::{
     App, AppContext, Context, Entity, EntityId, FocusHandle, Focusable, IntoElement, ParentElement, Render, Styled,
-    WeakEntity, Window,
+    Window,
     base::{PresencePhase, Transition},
     component::empty::{Empty, EmptyHeader, EmptyTitle},
     div,
@@ -11,27 +11,25 @@ use gpui_kit::{
 };
 use ui::{NavMotion, NavOperation, NavStack, NavStackState};
 
-use crate::{Workspace, item::ItemHandle};
+use crate::item::ItemHandle;
 
 pub struct Pane {
     // Cache only: oldest opened items come first; navigation does not reorder them.
     items: Vec<Box<dyn ItemHandle>>,
     focus_handle: FocusHandle,
-    pub(crate) workspace: WeakEntity<Workspace>,
     // Includes the active item; None leaves the cache unbounded.
     max_items: Option<NonZeroUsize>,
     stack: Entity<NavStackState>,
 }
 
 impl Pane {
-    pub fn new(workspace: WeakEntity<Workspace>, cx: &mut Context<Self>) -> Self {
+    pub fn new(cx: &mut Context<Self>) -> Self {
         let stack = cx.new(|_cx| NavStackState::new());
         cx.observe(&stack, |_, _, cx| cx.notify()).detach();
 
         Self {
             items: Vec::new(),
             stack,
-            workspace,
             max_items: NonZeroUsize::new(10),
             focus_handle: cx.focus_handle(),
         }
@@ -92,11 +90,6 @@ impl Pane {
         let Some(item_index) = self.items.iter().position(|item| item.item_id() == item_id) else {
             return;
         };
-        let was_active = self
-            .stack
-            .read(cx)
-            .current()
-            .is_some_and(|view| view.entity_id() == item_id);
         let should_focus = focus_item
             || self.items[item_index]
                 .item_focus_handle(cx)
@@ -105,10 +98,6 @@ impl Pane {
         self.stack.update(cx, |stack, cx| stack.remove(item_id, cx));
         item.on_removed(cx);
 
-        if was_active {
-            self.update_title_bar(window, cx);
-            self.update_status_bar(window, cx);
-        }
         if should_focus {
             self.focus_active_item(window, cx);
         }
@@ -133,9 +122,6 @@ impl Pane {
     pub fn activate_item(&mut self, index: usize, focus_item: bool, window: &mut Window, cx: &mut Context<Self>) {
         if index < self.items.len() {
             self.push(index, cx);
-
-            self.update_title_bar(window, cx);
-            self.update_status_bar(window, cx);
 
             if focus_item {
                 self.focus_active_item(window, cx);
@@ -170,34 +156,9 @@ impl Pane {
         }
     }
 
-    pub(crate) fn update_title_bar(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        let workspace = self.workspace.clone();
-        let active_item = self.active_item(cx);
-
-        window.defer(cx, move |window, cx| {
-            let Ok(Some(title_bar)) = workspace.read_with(cx, |workspace, _| workspace.title_bar.clone()) else {
-                return;
-            };
-
-            title_bar.update(cx, move |title_bar, cx| {
-                title_bar.set_active_item(active_item, window, cx);
-            });
-        });
-    }
-
-    pub fn update_status_bar(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        let workspace = self.workspace.clone();
-        let active_item = self.active_item(cx);
-
-        window.defer(cx, move |window, cx| {
-            let Ok(Some(status_bar)) = workspace.read_with(cx, |workspace, _| workspace.status_bar.clone()) else {
-                return;
-            };
-
-            status_bar.update(cx, move |status_bar, cx| {
-                status_bar.set_active_item(active_item, window, cx);
-            });
-        });
+    /// Whether the navigation stack has a page beneath the current one.
+    pub fn can_go_back(&self, cx: &App) -> bool {
+        self.stack.read(cx).depth() > 1
     }
 }
 

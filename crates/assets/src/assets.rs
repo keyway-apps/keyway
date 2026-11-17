@@ -31,10 +31,7 @@ impl AssetSource for Assets {
 
     fn list(&self, path: &str) -> Result<Vec<SharedString>> {
         let mut result: Vec<SharedString> = Self::iter()
-            .filter_map(|p| {
-                p.starts_with(path)
-                    .then(|| SharedString::from(p.to_string()))
-            })
+            .filter_map(|p| p.starts_with(path).then(|| SharedString::from(p.to_string())))
             .collect();
 
         result.extend(ExtraIcons.list(path)?);

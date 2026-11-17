@@ -30,10 +30,9 @@ fn main() {
 
             let app_state = Arc::new(AppState { workspace_store });
             AppState::set_global(app_state.clone(), cx);
-            command::init(cx);
+            // command::init(cx);
 
             search::init(cx);
-            command_palette::init(cx);
 
             create_workspace(app_state, cx);
         });
@@ -59,6 +58,7 @@ fn create_workspace(app_state: Arc<AppState>, cx: &mut App) {
 
     open_new(app_state, options, cx, |workspace, window, cx| {
         workspace.update_pinned_workspace(window, cx);
+        command_palette::open(workspace, window, cx);
     })
     .detach_and_log_err(cx);
 }

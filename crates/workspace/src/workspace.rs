@@ -71,9 +71,9 @@ impl Workspace {
     pub fn new(app_state: Arc<AppState>, window: &mut Window, cx: &mut Context<Self>) -> Self {
         let weak_handle = cx.entity().downgrade();
 
-        let center = cx.new(|cx| Pane::new(weak_handle.clone(), cx));
+        let center = cx.new(Pane::new);
 
-        let title_bar = cx.new(|cx| TitleBar::new(weak_handle.clone(), window, cx));
+        let title_bar = cx.new(|cx| TitleBar::new(&center, weak_handle.clone(), window, cx));
         let status_bar = cx.new(|cx| StatusBar::new(weak_handle.clone(), window, cx));
 
         let window_handle = window.window_handle();
@@ -192,8 +192,8 @@ impl Workspace {
             if popped.is_none() {
                 return false;
             }
-            pane.update_title_bar(window, cx);
-            pane.update_status_bar(window, cx);
+            // pane.update_title_bar(window, cx);
+            // pane.update_status_bar(window, cx);
             pane.focus_active_item(window, cx);
             true
         })

@@ -1,11 +1,16 @@
 use std::any::TypeId;
 
 use gpui_kit::{
-    AnyView, App, Context, Entity, InteractiveElement, IntoElement, ParentElement, Render, Styled, WeakEntity, Window,
-    WindowControlArea, base::h_flex, rgb,
+    AnyView, App, Context, Entity, InteractiveElement, IntoElement, ParentElement, Render, Styled, Subscription,
+    WeakEntity, Window, WindowControlArea,
+    base::h_flex,
+    component::{IconName, Sizable, button::Button},
+    div,
+    prelude::FluentBuilder,
+    rgb,
 };
 
-use crate::{Workspace, item::ItemHandle};
+use crate::{Workspace, item::ItemHandle, pane::Pane};
 
 pub trait TitleItemView: Render {
     fn set_active_item(&mut self, active_item: Option<&dyn ItemHandle>, window: &mut Window, cx: &mut Context<Self>);
@@ -22,29 +27,36 @@ trait TitleItemViewHandle: Send {
 pub struct TitleBar {
     left_items: Vec<Box<dyn TitleItemViewHandle>>,
     right_items: Vec<Box<dyn TitleItemViewHandle>>,
+    pane: Entity<Pane>,
     workspace: WeakEntity<Workspace>,
-    active_item: Option<Box<dyn ItemHandle>>,
+    _observe_pane: Subscription,
 }
 
 impl TitleBar {
-    pub fn new(workspace: WeakEntity<Workspace>, window: &mut Window, cx: &mut Context<TitleBar>) -> Self {
-        Self {
+    pub fn new(
+        pane: &Entity<Pane>,
+        workspace: WeakEntity<Workspace>,
+        window: &mut Window,
+        cx: &mut Context<TitleBar>,
+    ) -> Self {
+        let mut this = Self {
             left_items: Default::default(),
             right_items: Default::default(),
+            pane: pane.clone(),
             workspace,
-            active_item: Default::default(),
-        }
-    }
-
-    pub fn active_item(&self) -> Option<Box<dyn ItemHandle>> {
-        self.active_item.clone()
+            _observe_pane: cx.observe_in(pane, window, |this, _, window, cx| {
+                this.update_active_item(window, cx);
+            }),
+        };
+        this.update_active_item(window, cx);
+        this
     }
 
     pub fn add_left_item<T>(&mut self, item: Entity<T>, window: &mut Window, cx: &mut Context<Self>)
     where
         T: 'static + TitleItemView,
     {
-        let active_item = self.active_item();
+        let active_item = self.pane.read(cx).active_item(cx);
         item.set_active_item(active_item.as_deref(), window, cx);
 
         self.left_items.push(Box::new(item));
@@ -55,20 +67,39 @@ impl TitleBar {
     where
         T: 'static + TitleItemView,
     {
-        let active_item = self.active_item();
+        let active_item = self.pane.read(cx).active_item(cx);
         item.set_active_item(active_item.as_deref(), window, cx);
 
         self.right_items.push(Box::new(item));
         cx.notify();
     }
 
-    pub fn set_active_item(&mut self, item: Option<Box<dyn ItemHandle>>, window: &mut Window, cx: &mut Context<Self>) {
-        self.active_item = item;
-        self.update_active_item(window, cx);
+    pub fn item_of_type<T: TitleItemView>(&self) -> Option<Entity<T>> {
+        self.left_items
+            .iter()
+            .chain(self.right_items.iter())
+            .find_map(|item| item.to_any().downcast().ok())
+    }
+
+    pub fn position_of_item<T>(&self) -> Option<usize>
+    where
+        T: TitleItemView,
+    {
+        for (index, item) in self.left_items.iter().enumerate() {
+            if item.item_type() == TypeId::of::<T>() {
+                return Some(index);
+            }
+        }
+        for (index, item) in self.right_items.iter().enumerate() {
+            if item.item_type() == TypeId::of::<T>() {
+                return Some(index + self.left_items.len());
+            }
+        }
+        None
     }
 
     fn update_active_item(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        let active_item = self.active_item();
+        let active_item = self.pane.read(cx).active_item(cx);
         for item in self.left_items.iter().chain(&self.right_items) {
             item.set_active_item(active_item.as_deref(), window, cx);
         }
@@ -77,6 +108,8 @@ impl TitleBar {
 
 impl Render for TitleBar {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let can_go_back = self.pane.read(cx).can_go_back(cx);
+
         h_flex()
             .h_16()
             .gap_2()
@@ -84,6 +117,23 @@ impl Render for TitleBar {
             .border_b_1()
             .border_color(rgb(0xE7E7E7))
             .window_control_area(WindowControlArea::Drag)
+            .when(can_go_back, |bar| {
+                bar.child(
+                    div().occlude().child(
+                        Button::new("btn-back")
+                            .small()
+                            .outline()
+                            .icon(IconName::ArrowLeft)
+                            .on_click(cx.listener(|this, _, window, cx| {
+                                this.workspace
+                                    .update(cx, |workspace, cx| {
+                                        workspace.go_back(window, cx);
+                                    })
+                                    .ok();
+                            })),
+                    ),
+                )
+            })
             .child(self.render_left_tools(cx))
             .child(self.render_right_tools(cx))
     }
@@ -94,8 +144,7 @@ impl TitleBar {
         h_flex().min_w_0().flex_1().gap_2().overflow_x_hidden().children(
             self.left_items
                 .iter()
-                .enumerate()
-                .filter_map(|(_, item)| render_hideable_item(item.as_ref(), cx)),
+                .filter_map(|item| render_hideable_item(item.as_ref(), cx)),
         )
     }
 
@@ -103,8 +152,7 @@ impl TitleBar {
         h_flex().gap_2().overflow_x_hidden().children(
             self.right_items
                 .iter()
-                .enumerate()
-                .filter_map(|(_, item)| render_hideable_item(item.as_ref(), cx)),
+                .filter_map(|item| render_hideable_item(item.as_ref(), cx)),
         )
     }
 }

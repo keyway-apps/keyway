@@ -1,6 +1,26 @@
-use gpui_kit::{AnyWeakEntity, App, Entity, SharedString, WeakEntity};
+use std::sync::Arc;
+
+use aho_corasick::AhoCorasick;
+use fancy_regex::Regex;
+use gpui_kit::{AnyWeakEntity, App, Context, Entity, SharedString, Task, WeakEntity, Window};
 
 use crate::item::{Item, WeakItemHandle};
+
+#[derive(Clone, Debug)]
+pub enum SearchQuery {
+    Text {
+        search: AhoCorasick,
+        whole_word: bool,
+        case_sensitive: bool,
+        query: Arc<str>,
+    },
+    Regex {
+        regex: Regex,
+        whole_word: bool,
+        case_sensitive: bool,
+        query: Arc<str>,
+    },
+}
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct SearchOptions {
@@ -21,6 +41,8 @@ pub trait SearchableItem: Item {
     fn placeholder_text(&self, _cx: &App) -> Option<SharedString> {
         None
     }
+
+    fn find_matches(&mut self, query: Arc<SearchQuery>, window: &mut Window, cx: &mut Context<Self>) -> Task<()>;
 }
 
 pub trait SearchableItemHandle {
@@ -28,6 +50,7 @@ pub trait SearchableItemHandle {
     fn boxed_clone(&self) -> Box<dyn SearchableItemHandle>;
     fn supported_options(&self, cx: &App) -> SearchOptions;
     fn placeholder_text(&self, cx: &App) -> Option<SharedString>;
+    fn find_matches(&self, query: Arc<SearchQuery>, window: &mut Window, cx: &mut App) -> Task<()>;
 }
 
 impl<T: SearchableItem> SearchableItemHandle for Entity<T> {
@@ -45,6 +68,10 @@ impl<T: SearchableItem> SearchableItemHandle for Entity<T> {
 
     fn placeholder_text(&self, cx: &App) -> Option<SharedString> {
         self.read(cx).placeholder_text(cx)
+    }
+
+    fn find_matches(&self, query: Arc<SearchQuery>, window: &mut Window, cx: &mut App) -> Task<()> {
+        self.update(cx, |item, cx| item.find_matches(query, window, cx))
     }
 }
 

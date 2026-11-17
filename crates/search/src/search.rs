@@ -1,11 +1,22 @@
 use gpui_kit::{
     App, AppContext, Context, Entity, InteractiveElement, IntoElement, ParentElement, Render, SharedString, Styled,
     WeakEntity, Window,
+    assets::IconName,
     base::{h_flex, input::InputState},
-    component::input::Input,
+    component::{
+        Sizable,
+        button::{Toggle, ToggleVariants},
+        input::Input,
+    },
+    prelude::FluentBuilder,
 };
 use i18n::tr;
-use workspace::{Workspace, item::ItemHandle, title_bar::TitleItemView};
+use workspace::{
+    Workspace,
+    item::ItemHandle,
+    searchable::{SearchOptions, SearchableItemHandle},
+    title_bar::TitleItemView,
+};
 
 rust_i18n::i18n!("../../locales", fallback = "en");
 
@@ -27,6 +38,7 @@ pub fn init(cx: &mut App) {
 
 pub struct SearchBar {
     pub(crate) input_state: Entity<InputState>,
+    active_searchable_item: Option<Box<dyn SearchableItemHandle>>,
 }
 
 impl SearchBar {
@@ -34,28 +46,76 @@ impl SearchBar {
         let placeholder: SharedString = tr!("search_bar.placeholder").into();
         let input_state = cx.new(|cx| InputState::new(window, cx).placeholder(placeholder.clone()));
 
-        Self { input_state }
+        Self {
+            input_state,
+            active_searchable_item: None,
+        }
+    }
+
+    fn supported_options(&self, cx: &mut Context<Self>) -> SearchOptions {
+        self.active_searchable_item
+            .as_ref()
+            .map(|item| item.supported_options(cx))
+            .unwrap_or_default()
     }
 }
 
 impl TitleItemView for SearchBar {
     fn set_active_item(&mut self, active_item: Option<&dyn ItemHandle>, window: &mut Window, cx: &mut Context<Self>) {
-        //
+        let Some(searchable) = active_item.map(|item| item.to_searchable_item_handle(cx)).flatten() else {
+            self.active_searchable_item = None;
+            return;
+        };
+
+        self.active_searchable_item = Some(searchable);
     }
 
-    fn hide(&self, cx: &App) -> bool {
-        false
+    fn hide(&self, _cx: &App) -> bool {
+        self.active_searchable_item.is_none()
     }
 }
 
 impl Render for SearchBar {
-    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        h_flex().h_12().flex().min_w_0().flex_1().occlude().child(
-            Input::new(&self.input_state)
-                .text_lg()
-                .appearance(false)
-                .cleanable(true)
-                .px_0(),
-        )
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        h_flex()
+            .h_12()
+            .flex()
+            .min_w_0()
+            .flex_1()
+            .occlude()
+            .child(
+                Input::new(&self.input_state)
+                    .text_lg()
+                    .appearance(false)
+                    .cleanable(true)
+                    .px_0(),
+            )
+            .when(self.supported_options(cx).case, |options| {
+                options.child(
+                    Toggle::new("search-case")
+                        .small()
+                        .ghost()
+                        .icon(IconName::CaseSensitive)
+                        .tooltip(tr!("search_bar.match_case")),
+                )
+            })
+            .when(self.supported_options(cx).word, |options| {
+                options.child(
+                    Toggle::new("search-word")
+                        .small()
+                        .ghost()
+                        .icon(IconName::WholeWord)
+                        .tooltip(tr!("search_bar.match_whole_word")),
+                )
+            })
+            .when(self.supported_options(cx).regex, |options| {
+                options.child(
+                    Toggle::new("search-regex")
+                        .small()
+                        .ghost()
+                        .icon(IconName::Regex)
+                        .tooltip(tr!("search_bar.use_regex")),
+                )
+            })
     }
 }

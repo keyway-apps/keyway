@@ -11,6 +11,8 @@ path = "src/command.rs"
 doctest = false
 
 [dependencies]
+workspace.workspace = true
+
 anyhow.workspace = true
 gpui-kit.workspace = true
 serde.workspace = true

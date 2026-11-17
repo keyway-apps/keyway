@@ -1,3 +1,5 @@
+command_palette:
+  empty: No results found
 search_bar:
   placeholder: Search for apps and commands...
   match_case: Match case
